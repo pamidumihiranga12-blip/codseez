@@ -9,11 +9,11 @@ const UsersStorage = {
             const defaults = [
                 {
                     id: 'usr_admin',
-                    name: 'Pamidu Mihiranga',
+                    name: 'SmartZone Admin',
                     storeName: 'SmartZone Head Office',
-                    email: 'admin@smartzone.lk',
+                    email: 'smartzonelk101@gmail.com',
                     phone: '0786800086',
-                    password: 'admin123',
+                    password: '2007admin@',
                     role: 'admin',
                     status: 'active',
                     plan: 'Enterprise Lifetime',
@@ -50,7 +50,36 @@ const UsersStorage = {
             localStorage.setItem('sz_oms_users', JSON.stringify(defaults));
             return defaults;
         }
-        return JSON.parse(raw);
+
+        const users = JSON.parse(raw);
+        // Auto-migration: Ensure admin credentials stay in sync with latest configured values
+        const adminUser = users.find(u => u.id === 'usr_admin' || u.role === 'admin');
+        if (adminUser) {
+            let updated = false;
+            if (adminUser.email !== 'smartzonelk101@gmail.com') {
+                adminUser.email = 'smartzonelk101@gmail.com';
+                updated = true;
+            }
+            if (adminUser.password !== '2007admin@') {
+                adminUser.password = '2007admin@';
+                updated = true;
+            }
+            if (updated) {
+                localStorage.setItem('sz_oms_users', JSON.stringify(users));
+                try {
+                    const curRaw = localStorage.getItem('sz_oms_current_user');
+                    if (curRaw) {
+                        const cur = JSON.parse(curRaw);
+                        if (cur.id === 'usr_admin' || cur.role === 'admin') {
+                            cur.email = 'smartzonelk101@gmail.com';
+                            cur.password = '2007admin@';
+                            localStorage.setItem('sz_oms_current_user', JSON.stringify(cur));
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+        return users;
     },
 
     saveAll(users) {
@@ -1333,8 +1362,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
         const currentUser = localStorage.getItem('sz_oms_current_user');
+        const hash = window.location.hash || '';
+        const search = window.location.search || '';
+
+        // If someone navigates directly to #admin or ?admin
+        if (hash === '#admin' || search.includes('admin')) {
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    if (user && user.role === 'admin') {
+                        if (typeof window.navigateTo === 'function') {
+                            window.navigateTo('page-admin', 'Super Admin Console', 'Manage Stores & Tenancies');
+                        }
+                        return;
+                    }
+                } catch(e) {}
+            }
+            // Not authenticated as admin -> redirect to dedicated admin portal
+            window.location.href = 'admin/index.html';
+            return;
+        }
+
         if (!currentUser && typeof window.openAuthPortal === 'function') {
             window.openAuthPortal('login');
+        } else if (currentUser) {
+            try {
+                const user = JSON.parse(currentUser);
+                if (user && user.role === 'admin' && sessionStorage.getItem('sz_oms_admin_redirect') === 'page-admin') {
+                    sessionStorage.removeItem('sz_oms_admin_redirect');
+                    if (typeof window.navigateTo === 'function') {
+                        window.navigateTo('page-admin', 'Super Admin Console', 'Manage Stores & Tenancies');
+                    }
+                }
+            } catch(e) {}
         }
     } catch (e) {
         console.error('[Codseez OMS Init] Auth redirect error:', e);
@@ -2458,7 +2518,7 @@ window.openThermalLabelModal = function(order) {
     const service = DeliveryServices.getById(order.serviceId) || DeliveryServices.getAll().find(s => (s.provider || '').toLowerCase().includes(isFardar ? 'fardar' : 'trans'));
     const clientId = (service && service.clientId) || order.clientId || (isFardar ? '5980' : '4792');
     const logoImg = isFardar ? 'assets/fed-logo.webp' : 'assets/transex-logo.webp';
-    const badgeText = isFardar ? `FED DOMESTIC (ID: ${clientId})` : `TRANS EXPRESS (ID: ${clientId})`;
+    const badgeText = isFardar ? 'FED DOMESTIC' : 'TRANS EXPRESS';
 
     document.getElementById('lbl-logo').src = logoImg;
     document.getElementById('lbl-badge').textContent = badgeText;
@@ -2574,7 +2634,7 @@ function populateDeliveryServiceDropdown() {
     }
     select.innerHTML = list.map(s => `
         <option value="${s.id}" data-base="${s.baseCharge || 0}" data-extra="${s.extraChargeKg || 0}">
-            ${s.name} (${s.provider} - ID: ${s.clientId || '-'})
+            ${s.name} (${s.provider})
         </option>
     `).join('');
 
@@ -3131,9 +3191,13 @@ function switchAuthTab(tab) {
     const btn = document.getElementById('tab-btn-' + tab);
     if (btn) btn.classList.add('active');
 
+    if (tab === 'admin') {
+        window.location.href = 'admin/index.html';
+        return;
+    }
+
     if (tab === 'login' && loginForm) loginForm.style.display = 'block';
     if (tab === 'register' && regForm) regForm.style.display = 'block';
-    if (tab === 'admin' && adminForm) adminForm.style.display = 'block';
 }
 window.switchAuthTab = switchAuthTab;
 
@@ -3183,6 +3247,12 @@ function initAuthPortal() {
             }
 
             closeAuthPortal();
+            if (res.user.role === 'admin') {
+                alert(`🛡️ Welcome back, Super Admin (${res.user.name})!`);
+                Auth.updateUserUI();
+                navigateTo('page-admin', 'Super Admin Console', 'Manage Stores & Tenancies');
+                return;
+            }
             alert(`✅ Welcome back, ${res.user.name} (${res.user.storeName || 'SmartZone'})!`);
             Auth.updateUserUI();
             navigateTo('page-dashboard', res.user.storeName || 'SmartZone', 'Business Dashboard');
@@ -3234,12 +3304,155 @@ function initAuthPortal() {
 // ========================================================
 // 15. SUBSCRIPTION PAYMENT CONTROLLER
 // ========================================================
+// Bank Accounts Repository for Subscription Deposits
+const BankAccountsStorage = {
+    getAll() {
+        const raw = localStorage.getItem('sz_oms_bank_accounts');
+        if (!raw) {
+            const defaults = [
+                {
+                    id: 'bank_1',
+                    enabled: true,
+                    bankName: 'Commercial Bank of Ceylon',
+                    accountName: 'SmartZone Solutions LK',
+                    accountNumber: '8010049281',
+                    branch: 'Padaviya Branch'
+                },
+                {
+                    id: 'bank_2',
+                    enabled: false,
+                    bankName: 'Bank of Ceylon (BOC)',
+                    accountName: 'SmartZone Solutions LK',
+                    accountNumber: '',
+                    branch: ''
+                }
+            ];
+            localStorage.setItem('sz_oms_bank_accounts', JSON.stringify(defaults));
+            return defaults;
+        }
+        return JSON.parse(raw);
+    },
+    saveAll(banks) {
+        localStorage.setItem('sz_oms_bank_accounts', JSON.stringify(banks));
+    }
+};
+
+// Subscription Plans Pricing Repository
+const SubscriptionPlans = {
+    getAll() {
+        const raw = localStorage.getItem('sz_oms_sub_plans');
+        if (!raw) {
+            const defaults = {
+                monthly: 2500,
+                sixMonths: 12000,
+                oneYear: 22000,
+                lifetime: 45000
+            };
+            localStorage.setItem('sz_oms_sub_plans', JSON.stringify(defaults));
+            return defaults;
+        }
+        return JSON.parse(raw);
+    },
+    save(plans) {
+        localStorage.setItem('sz_oms_sub_plans', JSON.stringify(plans));
+    }
+};
+
+// Render Bank Account Details dynamically in Subscription Checkout Modal
+function renderSubscriptionBankDetails() {
+    const container = document.getElementById('sub-bank-details-container');
+    if (!container) return;
+
+    const banks = BankAccountsStorage.getAll().filter(b => b.enabled !== false && b.accountNumber);
+    if (banks.length === 0) {
+        container.innerHTML = `
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px; font-size:12px; color:#64748b; text-align:center;">
+                🏦 Contact Super Admin (0786800086) for Bank Account Deposit details.
+            </div>
+        `;
+        return;
+    }
+
+    const gridStyle = banks.length > 1
+        ? 'display:grid; grid-template-columns:1fr 1fr; gap:10px;'
+        : 'display:block;';
+
+    container.innerHTML = `
+        <div style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">
+            🏦 Direct Bank Deposit Details (${banks.length} Account${banks.length > 1 ? 's' : ''} Configured):
+        </div>
+        <div style="${gridStyle}">
+            ${banks.map((b, idx) => `
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:12px; position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:10px; font-weight:800; color:${idx === 0 ? '#2563eb' : '#7c3aed'}; text-transform:uppercase;">Bank Account ${idx + 1}</span>
+                    </div>
+                    <div style="font-size:13px; font-weight:800; color:#0f172a; margin-top:1px;">${b.bankName}</div>
+                    <div style="font-size:12px; color:#334155; margin-top:2px;">Name: <strong>${b.accountName}</strong></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:5px 8px; margin:6px 0;">
+                        <span style="font-size:13.5px; font-family:'JetBrains Mono'; font-weight:800; color:#1d4ed8;">${b.accountNumber}</span>
+                        <button type="button" class="btn-cancel" style="padding:2px 8px; font-size:11px; font-weight:700; color:#2563eb; border:1px solid #93c5fd; background:#fff;" onclick="copyBankAccNumber('${b.accountNumber}', this)">Copy</button>
+                    </div>
+                    <div style="font-size:11.5px; color:#64748b;">Branch: ${b.branch || '-'}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+window.copyBankAccNumber = function(accNum, btn) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(accNum);
+    }
+    if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.style.color = '#15803d';
+        setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.color = '#2563eb';
+        }, 1500);
+    }
+};
+
+window.updateSubscriptionModalPlanCards = function() {
+    const p = SubscriptionPlans.getAll();
+    const elM = document.getElementById('plan-price-monthly');
+    const el6 = document.getElementById('plan-price-6months');
+    const el1 = document.getElementById('plan-price-1year');
+    const elL = document.getElementById('plan-price-lifetime');
+
+    if (elM) elM.textContent = `Rs. ${p.monthly.toLocaleString()}`;
+    if (el6) el6.textContent = `Rs. ${p.sixMonths.toLocaleString()}`;
+    if (el1) el1.textContent = `Rs. ${p.oneYear.toLocaleString()}`;
+    if (elL) elL.textContent = `Rs. ${p.lifetime.toLocaleString()}`;
+
+    // Update active plan input & total
+    const curPlan = document.getElementById('sub-selected-plan')?.value || 'Monthly';
+    let amt = p.monthly;
+    if (curPlan === '6 Months') amt = p.sixMonths;
+    if (curPlan === '1 Year Pro') amt = p.oneYear;
+    if (curPlan === 'Lifetime VIP') amt = p.lifetime;
+
+    const amtInput = document.getElementById('sub-selected-amount');
+    if (amtInput) amtInput.value = amt;
+
+    const dispTotal = document.getElementById('sub-display-total');
+    if (dispTotal) dispTotal.textContent = `Rs. ${parseFloat(amt).toLocaleString()}.00`;
+};
+
+// ========================================================
+// 15. SUBSCRIPTION PAYMENT CONTROLLER
+// ========================================================
 function setupSubscriptionPaymentModal() {
     const modal = document.getElementById('subscription-payment-modal');
     const form = document.getElementById('subscription-payment-form');
+    let currentSlipBase64 = null;
 
     window.openSubscriptionPaymentModal = function() {
         if (!modal) return;
+        renderSubscriptionBankDetails();
+        updateSubscriptionModalPlanCards();
         modal.classList.add('open');
     };
 
@@ -3247,77 +3460,116 @@ function setupSubscriptionPaymentModal() {
         if (modal) modal.classList.remove('open');
     };
 
-    window.selectPlan = function(planName, amount, el) {
-        document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('active'));
+    window.selectPlan = function(planName, amount, el, cycleText) {
+        document.querySelectorAll('#sub-plans-grid .plan-card').forEach(c => c.classList.remove('active'));
         if (el) el.classList.add('active');
+
+        // Check if dynamic price exists
+        const prices = SubscriptionPlans.getAll();
+        let finalAmount = amount;
+        if (planName === 'Monthly') finalAmount = prices.monthly;
+        else if (planName === '6 Months') finalAmount = prices.sixMonths;
+        else if (planName === '1 Year Pro') finalAmount = prices.oneYear;
+        else if (planName === 'Lifetime VIP') finalAmount = prices.lifetime;
+
         document.getElementById('sub-selected-plan').value = planName;
-        document.getElementById('sub-selected-amount').value = amount;
-        document.getElementById('sub-display-total').textContent = `Rs. ${amount.toLocaleString()}.00`;
-    };
+        document.getElementById('sub-selected-amount').value = finalAmount;
+        document.getElementById('sub-selected-cycle').value = cycleText || '30 Days Access';
+        document.getElementById('sub-display-total').textContent = `Rs. ${parseFloat(finalAmount).toLocaleString()}.00`;
 
-    window.simulateInstantCardPayment = function() {
-        const curUser = Auth.getCurrentUser() || window.pendingActivationUser;
-        if (!curUser) {
-            alert('Please sign in or register first!');
-            return;
+        const badge = document.getElementById('sub-display-cycle-badge');
+        if (badge) {
+            badge.textContent = cycleText ? `⏳ ${cycleText}` : '⏳ Active Access';
         }
-
-        const plan = document.getElementById('sub-selected-plan').value || 'Monthly';
-        const amount = parseFloat(document.getElementById('sub-selected-amount').value || 2500);
-
-        PaymentsStorage.add({
-            userId: curUser.id,
-            storeName: curUser.storeName || curUser.name,
-            plan: plan,
-            amount: amount,
-            method: 'Instant Card Payment (Visa/Master)',
-            ref: 'CARD-' + Math.floor(100000 + Math.random() * 900000),
-            date: new Date().toISOString().slice(0, 16).replace('T', ' '),
-            status: 'Approved'
-        });
-
-        // Activate User Account
-        UsersStorage.update(curUser.id, {
-            status: 'active',
-            plan: `${plan} Pro Subscription`,
-            expiresAt: Date.now() + (plan.includes('Year') ? (365 * 86400000) : (plan.includes('6') ? (180 * 86400000) : (30 * 86400000)))
-        });
-
-        // Set as active session
-        const activatedUser = UsersStorage.getById(curUser.id);
-        Auth.setCurrentUser(activatedUser);
-        window.pendingActivationUser = null;
-
-        closeSubscriptionPaymentModal();
-        closeAuthPortal();
-        Auth.updateUserUI();
-        alert(`🎉 Subscription Activated Successfully!\n\nStore: ${activatedUser.storeName || activatedUser.name}\nPlan: ${plan}\nStatus: Active (Paid Pro)\nYour store is now fully unlocked with zero restrictions!`);
-        navigateTo('page-dashboard', activatedUser.storeName || 'Dashboard', 'Merchant Dashboard');
     };
+
+    // Handle slip image upload & live thumbnail preview
+    const slipFileInput = document.getElementById('sub-bank-slip-file');
+    const slipPreviewCont = document.getElementById('sub-slip-preview-container');
+    const slipPreviewImg = document.getElementById('sub-slip-preview-img');
+
+    if (slipFileInput) {
+        slipFileInput.addEventListener('change', () => {
+            const file = slipFileInput.files && slipFileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentSlipBase64 = e.target.result;
+                    if (slipPreviewImg && slipPreviewCont) {
+                        slipPreviewImg.src = currentSlipBase64;
+                        slipPreviewCont.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                currentSlipBase64 = null;
+                if (slipPreviewCont) slipPreviewCont.style.display = 'none';
+            }
+        });
+    }
 
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const curUser = Auth.getCurrentUser() || window.pendingActivationUser;
-            if (!curUser) return;
+            if (!curUser) {
+                alert('Please sign in or register your demo account first!');
+                return;
+            }
 
             const plan = document.getElementById('sub-selected-plan').value || 'Monthly';
             const amount = parseFloat(document.getElementById('sub-selected-amount').value || 2500);
+            const cycleText = document.getElementById('sub-selected-cycle')?.value || '30 Days Access';
             const ref = document.getElementById('sub-bank-ref').value.trim();
 
-            PaymentsStorage.add({
+            const submitBtn = document.getElementById('btn-sub-submit');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            // Save submission to PaymentsStorage
+            const newPayment = {
                 userId: curUser.id,
                 storeName: curUser.storeName || curUser.name,
+                customerName: curUser.name,
+                customerPhone: curUser.phone,
+                customerEmail: curUser.email,
                 plan: plan,
                 amount: amount,
+                cycleText: cycleText,
                 method: 'Bank Transfer Deposit',
                 ref: ref,
+                slipImage: currentSlipBase64 || null,
                 date: new Date().toISOString().slice(0, 16).replace('T', ' '),
                 status: 'Pending'
-            });
+            };
+
+            PaymentsStorage.add(newPayment);
+
+            // Send Real SMS Alert to Admin
+            const adminUser = UsersStorage.getById('usr_admin') || { phone: '0786800086' };
+            const adminPhone = adminUser.phone || '0786800086';
+            const adminAlertSms = `SmartZone OMS: New Subscription Deposit submitted!\nStore: ${curUser.storeName || curUser.name} (${curUser.phone})\nPlan: ${plan} (Rs. ${amount.toLocaleString()})\nRef: ${ref}\nPlease review & approve in Admin Panel.`;
+
+            try {
+                await SmsGateway.send(adminPhone, adminAlertSms, 'SMSLENZ', 'SMART ZONE');
+            } catch (err) {
+                console.warn('[Admin Deposit Alert SMS Error]', err);
+            }
+
+            // Reset form
+            form.reset();
+            currentSlipBase64 = null;
+            if (slipPreviewCont) slipPreviewCont.style.display = 'none';
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
 
             closeSubscriptionPaymentModal();
-            alert(`✅ Deposit Slip & Reference (${ref}) submitted for ${curUser.storeName || curUser.name}!\n\nSuper Admin will review and activate your subscription shortly.\n(💡 For instant test demo, you can click "Instant Card Test Activation" or log in as Super Admin and click "Approve & Activate").`);
+            alert(`✅ Deposit Slip & Reference (${ref}) submitted successfully for ${curUser.storeName || curUser.name}!\n\nAn SMS alert has been sent to Super Admin.\nYour subscription will be activated upon admin verification.`);
         });
     }
 }
@@ -3347,6 +3599,130 @@ function setupAdminConsole() {
 
         renderAdminUsersTable();
         renderAdminPaymentsTable();
+        populateAdminBankSettings();
+        populateAdminPricingSettings();
+    };
+
+    // Bank Accounts Admin Controls
+    window.populateAdminBankSettings = function() {
+        const banks = BankAccountsStorage.getAll();
+        const b1 = banks[0] || {};
+        const b2 = banks[1] || {};
+
+        const name1 = document.getElementById('admin-bank1-name');
+        const acc1 = document.getElementById('admin-bank1-acc-name');
+        const num1 = document.getElementById('admin-bank1-acc-num');
+        const br1 = document.getElementById('admin-bank1-branch');
+
+        if (name1) name1.value = b1.bankName || '';
+        if (acc1) acc1.value = b1.accountName || '';
+        if (num1) num1.value = b1.accountNumber || '';
+        if (br1) br1.value = b1.branch || '';
+
+        const en2 = document.getElementById('admin-bank2-enabled');
+        const name2 = document.getElementById('admin-bank2-name');
+        const acc2 = document.getElementById('admin-bank2-acc-name');
+        const num2 = document.getElementById('admin-bank2-acc-num');
+        const br2 = document.getElementById('admin-bank2-branch');
+
+        if (en2) en2.checked = !!b2.enabled;
+        if (name2) name2.value = b2.bankName || '';
+        if (acc2) acc2.value = b2.accountName || '';
+        if (num2) num2.value = b2.accountNumber || '';
+        if (br2) br2.value = b2.branch || '';
+
+        toggleAdminBank2Fields();
+    };
+
+    window.toggleAdminBank2Fields = function() {
+        const en2 = document.getElementById('admin-bank2-enabled')?.checked;
+        ['admin-bank2-name', 'admin-bank2-acc-name', 'admin-bank2-acc-num', 'admin-bank2-branch'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.disabled = !en2;
+                el.style.opacity = en2 ? '1' : '0.5';
+            }
+        });
+    };
+
+    window.saveAdminBankAccounts = function() {
+        const b1 = {
+            id: 'bank_1',
+            enabled: true,
+            bankName: document.getElementById('admin-bank1-name')?.value.trim() || 'Commercial Bank of Ceylon',
+            accountName: document.getElementById('admin-bank1-acc-name')?.value.trim() || 'SmartZone Solutions LK',
+            accountNumber: document.getElementById('admin-bank1-acc-num')?.value.trim() || '8010049281',
+            branch: document.getElementById('admin-bank1-branch')?.value.trim() || 'Padaviya Branch'
+        };
+
+        const b2Enabled = document.getElementById('admin-bank2-enabled')?.checked;
+        const b2 = {
+            id: 'bank_2',
+            enabled: !!b2Enabled,
+            bankName: document.getElementById('admin-bank2-name')?.value.trim() || 'Bank of Ceylon (BOC)',
+            accountName: document.getElementById('admin-bank2-acc-name')?.value.trim() || 'SmartZone Solutions LK',
+            accountNumber: document.getElementById('admin-bank2-acc-num')?.value.trim() || '',
+            branch: document.getElementById('admin-bank2-branch')?.value.trim() || ''
+        };
+
+        BankAccountsStorage.saveAll([b1, b2]);
+        renderSubscriptionBankDetails();
+        alert('✅ Bank Accounts configuration saved successfully!\nThese accounts will now be shown to customers in the subscription payment checkout.');
+    };
+
+    // Subscription Pricing Admin Controls
+    window.populateAdminPricingSettings = function() {
+        const prices = SubscriptionPlans.getAll();
+        const pM = document.getElementById('admin-price-monthly');
+        const p6 = document.getElementById('admin-price-6months');
+        const p1 = document.getElementById('admin-price-1year');
+        const pL = document.getElementById('admin-price-lifetime');
+
+        if (pM) pM.value = prices.monthly || 2500;
+        if (p6) p6.value = prices.sixMonths || 12000;
+        if (p1) p1.value = prices.oneYear || 22000;
+        if (pL) pL.value = prices.lifetime || 45000;
+
+        updateSubscriptionModalPlanCards();
+    };
+
+    window.saveAdminPricingPlans = function() {
+        const prices = {
+            monthly: parseFloat(document.getElementById('admin-price-monthly')?.value || 2500),
+            sixMonths: parseFloat(document.getElementById('admin-price-6months')?.value || 12000),
+            oneYear: parseFloat(document.getElementById('admin-price-1year')?.value || 22000),
+            lifetime: parseFloat(document.getElementById('admin-price-lifetime')?.value || 45000)
+        };
+
+        SubscriptionPlans.save(prices);
+        updateSubscriptionModalPlanCards();
+        alert('✅ Subscription Pricing rates saved successfully!\nUpdated prices are now active in the checkout modal.');
+    };
+
+    // Receipt Slip Image Viewer Modal
+    window.openAdminReceiptModal = function(payId) {
+        const payment = PaymentsStorage.getAll().find(p => p.id === payId);
+        if (!payment || !payment.slipImage) {
+            alert('No receipt slip image attached for this payment.');
+            return;
+        }
+        const modal = document.getElementById('admin-receipt-modal');
+        const img = document.getElementById('receipt-modal-img');
+        const info = document.getElementById('receipt-modal-info');
+        const dwn = document.getElementById('receipt-modal-download');
+
+        if (info) info.innerHTML = `Store: <strong>${payment.storeName}</strong> | Plan: <strong>${payment.plan} (Rs. ${parseFloat(payment.amount).toLocaleString()})</strong> | Ref: <code>${payment.ref}</code>`;
+        if (img) img.src = payment.slipImage;
+        if (dwn) {
+            dwn.href = payment.slipImage;
+            dwn.download = `receipt_${(payment.storeName || 'slip').replace(/\s+/g, '_')}_${payment.ref}.png`;
+        }
+        if (modal) modal.classList.add('open');
+    };
+
+    window.closeAdminReceiptModal = function() {
+        const modal = document.getElementById('admin-receipt-modal');
+        if (modal) modal.classList.remove('open');
     };
 
     window.renderAdminUsersTable = function() {
@@ -3370,7 +3746,7 @@ function setupAdminConsole() {
                 statusBadge = `<span class="badge-trial">Trial (${daysLeft}d left)</span>`;
             }
 
-            const expDateStr = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : 'Never';
+            const expDateStr = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : 'Lifetime Permanent';
 
             return `
                 <tr>
@@ -3415,33 +3791,58 @@ function setupAdminConsole() {
         if (!tbody) return;
 
         if (payments.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="empty-state-box">No payment submissions yet</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state-box">No payment submissions yet</td></tr>`;
             return;
         }
 
         tbody.innerHTML = payments.map(p => {
             const isApproved = p.status === 'Approved';
-            const statusBadge = isApproved 
-                ? `<span class="badge-paid">Approved</span>`
-                : `<span class="badge-trial">Pending Verification</span>`;
+            const isRejected = p.status === 'Rejected';
+
+            let statusBadge = `<span class="badge-trial">Pending Review</span>`;
+            if (isApproved) statusBadge = `<span class="badge-paid">✓ Approved</span>`;
+            if (isRejected) statusBadge = `<span class="badge-expired">✕ Rejected</span>`;
 
             return `
                 <tr>
-                    <td><strong>${p.storeName}</strong></td>
-                    <td><span style="font-weight:700; color:#2563eb;">${p.plan}</span></td>
-                    <td><strong>Rs. ${parseFloat(p.amount).toLocaleString()}</strong></td>
                     <td>
-                        <div>${p.method}</div>
-                        <code style="font-size:11px; color:#0284c7;">Ref: ${p.ref}</code>
+                        <strong style="font-size:13.5px; color:#0f172a;">${p.storeName}</strong>
+                        <div style="font-size:11.5px; color:#64748b;">${p.customerName || 'Owner'}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:12px;">📞 ${p.customerPhone || '-'}</div>
+                        <div style="font-size:11px; color:#64748b;">${p.customerEmail || '-'}</div>
+                    </td>
+                    <td><span style="font-weight:700; color:#2563eb;">${p.plan}</span></td>
+                    <td><strong style="font-size:13.5px;">Rs. ${parseFloat(p.amount || 0).toLocaleString()}</strong></td>
+                    <td>
+                        <div>${p.method || 'Bank Transfer'}</div>
+                        <code style="font-size:11px; color:#0284c7; font-weight:700;">Ref: ${p.ref}</code>
+                    </td>
+                    <td>
+                        ${p.slipImage ? `
+                            <button type="button" class="btn-cancel" style="font-size:11px; font-weight:700; color:#2563eb; padding:3px 8px; border:1px solid #bfdbfe; background:#eff6ff;" onclick="openAdminReceiptModal('${p.id}')">
+                                👁️ View Slip
+                            </button>
+                        ` : `<span style="font-size:11px; color:#94a3b8;">No file</span>`}
                     </td>
                     <td style="font-size:12px; color:#64748b;">${p.date}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        ${!isApproved ? `
-                            <button class="btn-create-order" style="padding:4px 10px; font-size:11.5px; width:auto;" onclick="adminApprovePayment('${p.id}', '${p.userId}', '${p.plan}')">
-                                Approve & Activate
-                            </button>
-                        ` : `<span style="color:#16a34a; font-size:12px; font-weight:700;">✓ Active</span>`}
+                        <div style="display:flex; gap:4px;">
+                            ${(!isApproved && !isRejected) ? `
+                                <button class="btn-create-order" style="padding:4px 10px; font-size:11.5px; width:auto; background:#10b981;" onclick="adminApprovePayment('${p.id}', '${p.userId}', '${p.plan}')">
+                                    ✅ Approve & Activate
+                                </button>
+                                <button class="btn-cancel" style="padding:4px 8px; font-size:11.5px; color:#ef4444; border:1px solid #fecaca;" onclick="adminRejectPayment('${p.id}', '${p.userId}')" title="Reject Payment">
+                                    ✕
+                                </button>
+                            ` : isApproved ? `
+                                <span style="color:#16a34a; font-size:12px; font-weight:700;">✓ Active Paid</span>
+                            ` : `
+                                <span style="color:#ef4444; font-size:12px; font-weight:700;">✕ Rejected</span>
+                            `}
+                        </div>
                     </td>
                 </tr>
             `;
@@ -3463,7 +3864,7 @@ function setupAdminConsole() {
         if (!user) return;
         UsersStorage.update(userId, {
             status: 'active',
-            plan: 'Pro Subscription (Admin Approved)',
+            plan: '1 Year Pro (Admin Activated)',
             expiresAt: Date.now() + (365 * 86400000)
         });
         renderAdminView();
@@ -3491,22 +3892,68 @@ function setupAdminConsole() {
         const adminUser = UsersStorage.getById('usr_admin');
         if (adminUser) {
             Auth.setCurrentUser(adminUser);
-            alert('👑 Returned to Super Admin Console (Pamidu Mihiranga).');
+            alert('👑 Returned to Super Admin Console (SmartZone Admin).');
             navigateTo('page-admin', 'Super Admin Console', 'Manage Stores & Tenancies');
         }
     };
 
-    window.adminApprovePayment = function(payId, userId, plan) {
+    // Admin Approves Customer Payment and Activates for Specific Package Duration
+    window.adminApprovePayment = async function(payId, userId, planName) {
         PaymentsStorage.updateStatus(payId, 'Approved');
-        if (userId) {
+
+        const user = UsersStorage.getById(userId);
+        if (user) {
+            let newExpiresAt = null;
+            let planTitle = `${planName || 'Pro'} Subscription`;
+
+            const pLower = (planName || '').toLowerCase();
+            const baseTime = (user.expiresAt && user.expiresAt > Date.now()) ? user.expiresAt : Date.now();
+
+            if (pLower.includes('life')) {
+                newExpiresAt = null; // Lifetime!
+                planTitle = 'Lifetime VIP Subscription';
+            } else if (pLower.includes('year') || pLower.includes('12')) {
+                newExpiresAt = baseTime + (365 * 86400000);
+                planTitle = '1 Year Pro Subscription';
+            } else if (pLower.includes('6')) {
+                newExpiresAt = baseTime + (180 * 86400000);
+                planTitle = '6 Months Pro Subscription';
+            } else {
+                // Default 1 month (30 days)
+                newExpiresAt = baseTime + (30 * 86400000);
+                planTitle = 'Monthly Subscription';
+            }
+
             UsersStorage.update(userId, {
                 status: 'active',
-                plan: `${plan} Pro Subscription`,
-                expiresAt: Date.now() + (plan.includes('Year') ? (365 * 86400000) : (30 * 86400000))
+                plan: planTitle,
+                expiresAt: newExpiresAt
             });
+
+            // Send Real Confirmation SMS to Customer
+            if (user.phone) {
+                const expStr = newExpiresAt ? new Date(newExpiresAt).toLocaleDateString() : 'Lifetime Permanent';
+                const userSms = `Dear ${user.name},\nYour Codseez OMS ${planTitle} for "${user.storeName || user.name}" has been APPROVED!\nAccess Active Until: ${expStr}.\nThank you for choosing SmartZone!`;
+                try {
+                    await SmsGateway.send(user.phone, userSms, 'SMSLENZ', 'SMART ZONE');
+                } catch(e) {
+                    console.warn('[Confirmation SMS Error]', e);
+                }
+            }
+
+            alert(`✅ Payment approved!\n\nStore: ${user.storeName || user.name}\nPlan: ${planTitle}\nStatus: Active Paid\nExpiry: ${newExpiresAt ? new Date(newExpiresAt).toLocaleDateString() : 'Lifetime Permanent'}\nConfirmation SMS sent to ${user.phone}!`);
+        } else {
+            alert('✅ Payment marked as approved!');
         }
+
         renderAdminView();
-        alert(`✅ Payment approved! Merchant account has been activated.`);
+    };
+
+    window.adminRejectPayment = function(payId, userId) {
+        if (!confirm('Reject this payment deposit submission?')) return;
+        PaymentsStorage.updateStatus(payId, 'Rejected');
+        renderAdminView();
+        alert('❌ Payment deposit has been marked as Rejected.');
     };
 
     // Add Merchant Modal

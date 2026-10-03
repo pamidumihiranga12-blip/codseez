@@ -16,6 +16,14 @@
     {
       "source": "/api/trans_express_webhook",
       "destination": "/api/trans_express_webhook.js"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin/index.html"
     }
   ]
 }

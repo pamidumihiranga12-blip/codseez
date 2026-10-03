@@ -175,8 +175,8 @@
                 <span class="nav-text">Settings</span>
             </a>
 
-            <!-- Super Admin Panel (Manage Stores & Subscriptions) -->
-            <a href="#" class="nav-item" id="nav-item-admin" data-page="page-admin" data-title="Admin Console" data-sub="Manage merchant accounts & 10-day trials">
+            <!-- Super Admin Panel (Manage Stores & Subscriptions) - Restricted to Super Admin -->
+            <a href="#" class="nav-item" id="nav-item-admin" data-page="page-admin" data-title="Admin Console" data-sub="Manage merchant accounts & 10-day trials" style="display:none;">
                 <span class="nav-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -1063,12 +1063,122 @@
                 </div>
             </div>
 
+            <!-- Bank Accounts Configuration (1 or 2 Accounts) -->
+            <div class="white-panel" style="margin-bottom:22px;">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title">🏦 Subscription Deposit Bank Accounts (1 or 2 Accounts)</div>
+                        <div class="panel-subtitle">Configure bank accounts shown to merchants when they deposit subscription payments</div>
+                    </div>
+                    <button type="button" class="btn-create-order" onclick="saveAdminBankAccounts()">
+                        💾 Save Bank Accounts
+                    </button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <!-- Bank Account 1 (Primary) -->
+                    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span style="font-size:12px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:0.5px;">🏦 Bank Account 1 (Primary)</span>
+                            <span style="font-size:11px; font-weight:700; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px;">Active</span>
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">BANK NAME</label>
+                            <input type="text" class="form-ctrl" id="admin-bank1-name" placeholder="Commercial Bank of Ceylon">
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">ACCOUNT NAME / HOLDER</label>
+                            <input type="text" class="form-ctrl" id="admin-bank1-acc-name" placeholder="SmartZone Solutions LK">
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">ACCOUNT NUMBER</label>
+                            <input type="text" class="form-ctrl" id="admin-bank1-acc-num" placeholder="8010049281" style="font-family:'JetBrains Mono'; font-weight:700;">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-tag">BRANCH</label>
+                            <input type="text" class="form-ctrl" id="admin-bank1-branch" placeholder="Padaviya Branch">
+                        </div>
+                    </div>
+
+                    <!-- Bank Account 2 (Secondary - Optional) -->
+                    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; padding:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span style="font-size:12px; font-weight:800; color:#7c3aed; text-transform:uppercase; letter-spacing:0.5px;">🏦 Bank Account 2 (Optional)</span>
+                            <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#475569; cursor:pointer;">
+                                <input type="checkbox" id="admin-bank2-enabled" onchange="toggleAdminBank2Fields()">
+                                Enable Account 2
+                            </label>
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">BANK NAME</label>
+                            <input type="text" class="form-ctrl" id="admin-bank2-name" placeholder="Bank of Ceylon (BOC) / Sampath / HNB">
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">ACCOUNT NAME / HOLDER</label>
+                            <input type="text" class="form-ctrl" id="admin-bank2-acc-name" placeholder="SmartZone Solutions LK">
+                        </div>
+                        <div class="field-group" style="margin-bottom:10px;">
+                            <label class="field-tag">ACCOUNT NUMBER</label>
+                            <input type="text" class="form-ctrl" id="admin-bank2-acc-num" placeholder="1234567890" style="font-family:'JetBrains Mono'; font-weight:700;">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-tag">BRANCH</label>
+                            <input type="text" class="form-ctrl" id="admin-bank2-branch" placeholder="Colombo Main Branch">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Pricing Packages Manager -->
+            <div class="white-panel" style="margin-bottom:22px;">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title">💰 Subscription Packages & Lifetime Pricing</div>
+                        <div class="panel-subtitle">Set merchant package subscription rates (Monthly, 6 Months, 1 Year, Lifetime)</div>
+                    </div>
+                    <button type="button" class="btn-create-order" onclick="saveAdminPricingPlans()">
+                        💾 Save Pricing Rates
+                    </button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Monthly (30 Days)</div>
+                        <div style="margin-top:6px;">
+                            <label class="field-tag">PRICE (RS.)</label>
+                            <input type="number" class="form-ctrl" id="admin-price-monthly" value="2500" style="font-weight:800; color:#2563eb;">
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase;">6 Months (180 Days)</div>
+                        <div style="margin-top:6px;">
+                            <label class="field-tag">PRICE (RS.)</label>
+                            <input type="number" class="form-ctrl" id="admin-price-6months" value="12000" style="font-weight:800; color:#2563eb;">
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; font-weight:800; color:#059669; text-transform:uppercase;">1 Year Pro (365 Days)</div>
+                        <div style="margin-top:6px;">
+                            <label class="field-tag">PRICE (RS.)</label>
+                            <input type="number" class="form-ctrl" id="admin-price-1year" value="22000" style="font-weight:800; color:#059669;">
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; font-weight:800; color:#7c3aed; text-transform:uppercase;">Lifetime VIP (Permanent)</div>
+                        <div style="margin-top:6px;">
+                            <label class="field-tag">PRICE (RS.)</label>
+                            <input type="number" class="form-ctrl" id="admin-price-lifetime" value="45000" style="font-weight:800; color:#7c3aed;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Subscription Payments & Bank Slips -->
             <div class="white-panel">
                 <div class="panel-title-bar">
                     <div>
                         <div class="panel-title">💳 Subscription Payments & Bank Slips</div>
-                        <div class="panel-subtitle">Review bank transfer deposits & approve full access</div>
+                        <div class="panel-subtitle">Review merchant deposit slips, view receipt attachments, and activate subscriptions</div>
                     </div>
                     <button class="btn-cancel" style="border:1px solid #e2e8f0; font-weight:700;" onclick="renderAdminPaymentsTable()">
                         ↻ Refresh
@@ -1079,10 +1189,12 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>STORE</th>
+                                <th>STORE & CUSTOMER</th>
+                                <th>CONTACT</th>
                                 <th>PLAN</th>
                                 <th>AMOUNT</th>
                                 <th>METHOD / REFERENCE</th>
+                                <th>RECEIPT SLIP</th>
                                 <th>DATE</th>
                                 <th>STATUS</th>
                                 <th>ACTION</th>
@@ -1621,75 +1733,80 @@
      MODAL 6: SUBSCRIPTION PAYMENT & ACTIVATION (PAY TO RENEW)
      ======================================================== -->
 <div id="subscription-payment-modal" class="modal-overlay">
-    <div class="modal-box" style="max-width:550px;">
+    <div class="modal-box" style="max-width:620px;">
         <div class="modal-head">
             <h3>💳 Activate Merchant Subscription</h3>
             <button type="button" class="modal-close-btn" onclick="closeSubscriptionPaymentModal()">✕</button>
         </div>
         <form id="subscription-payment-form">
             <div class="modal-body">
-                <p style="font-size:12.5px; color:#64748b; margin-bottom:16px;">
-                    Select your subscription plan and upload your bank deposit slip or activate instantly:
+                <p style="font-size:12.5px; color:#64748b; margin-bottom:14px;">
+                    Select your subscription plan and upload your bank deposit slip to activate your store:
                 </p>
 
-                <!-- 3 Plans Grid -->
-                <div class="plan-selector-grid">
-                    <div class="plan-card active" onclick="selectPlan('Monthly', 2500, this)">
+                <!-- 4 Plans Grid (Including Lifetime) -->
+                <div class="plan-selector-grid" id="sub-plans-grid">
+                    <div class="plan-card active" onclick="selectPlan('Monthly', 2500, this, '30 Days Access')">
                         <div class="plan-title">Monthly</div>
-                        <div class="plan-price">Rs. 2,500</div>
+                        <div class="plan-price" id="plan-price-monthly">Rs. 2,500</div>
                         <div class="plan-cycle">per month</div>
                     </div>
-                    <div class="plan-card" onclick="selectPlan('6 Months', 12000, this)">
+                    <div class="plan-card" onclick="selectPlan('6 Months', 12000, this, '180 Days Access')">
                         <span class="plan-badge-popular">POPULAR</span>
                         <div class="plan-title">6 Months</div>
-                        <div class="plan-price">Rs. 12,000</div>
+                        <div class="plan-price" id="plan-price-6months">Rs. 12,000</div>
                         <div class="plan-cycle">Rs. 2,000 / mo</div>
                     </div>
-                    <div class="plan-card" onclick="selectPlan('1 Year Pro', 22000, this)">
+                    <div class="plan-card" onclick="selectPlan('1 Year Pro', 22000, this, '365 Days Access')">
                         <div class="plan-title">1 Year Pro</div>
-                        <div class="plan-price">Rs. 22,000</div>
+                        <div class="plan-price" id="plan-price-1year">Rs. 22,000</div>
                         <div class="plan-cycle">Best Value</div>
+                    </div>
+                    <div class="plan-card" onclick="selectPlan('Lifetime VIP', 45000, this, 'Lifetime Permanent')">
+                        <span class="plan-badge-popular" style="background:linear-gradient(135deg, #8b5cf6, #ec4899);">VIP</span>
+                        <div class="plan-title">Lifetime</div>
+                        <div class="plan-price" id="plan-price-lifetime" style="color:#7c3aed;">Rs. 45,000</div>
+                        <div class="plan-cycle">One-Time Pay</div>
                     </div>
                 </div>
                 <input type="hidden" id="sub-selected-plan" value="Monthly">
                 <input type="hidden" id="sub-selected-amount" value="2500">
+                <input type="hidden" id="sub-selected-cycle" value="30 Days Access">
 
-                <!-- Bank Account Details Card -->
-                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
-                        🏦 Direct Bank Deposit Details:
-                    </div>
-                    <div style="font-size:13px; font-weight:700; color:#0f172a;">Commercial Bank of Ceylon</div>
-                    <div style="font-size:12.5px; color:#334155; margin-top:2px;">Account Name: <strong>SmartZone Solutions LK</strong></div>
-                    <div style="font-size:14px; font-family:'JetBrains Mono'; font-weight:800; color:#2563eb; margin:3px 0;">Account #: 8010049281</div>
-                    <div style="font-size:12px; color:#64748b;">Branch: Padaviya Branch</div>
+                <!-- Dynamic Bank Account Details (1 or 2 Accounts configured in Admin Panel) -->
+                <div id="sub-bank-details-container" style="margin-bottom:14px;">
+                    <!-- Rendered dynamically by renderSubscriptionBankDetails() -->
                 </div>
 
                 <!-- Reference / Slip input -->
                 <div class="field-group">
                     <label class="field-tag">BANK DEPOSIT REFERENCE / SLIP NOTE <span class="required-star">*</span></label>
-                    <input type="text" class="form-ctrl" id="sub-bank-ref" placeholder="Enter bank reference or deposit slip number" required>
+                    <input type="text" class="form-ctrl" id="sub-bank-ref" placeholder="Enter bank reference or deposit slip number (e.g. CB-98214)" required>
                 </div>
 
                 <div class="field-group">
-                    <label class="field-tag">ATTACH PAYMENT RECEIPT / SLIP (IMAGE)</label>
+                    <label class="field-tag">ATTACH PAYMENT RECEIPT / SLIP (IMAGE / SCREENSHOT)</label>
                     <input type="file" class="form-ctrl" id="sub-bank-slip-file" accept="image/*,.pdf">
+                    <div id="sub-slip-preview-container" style="display:none; margin-top:8px;">
+                        <img id="sub-slip-preview-img" src="" alt="Slip Preview" style="max-height:80px; border-radius:6px; border:1px solid #cbd5e1; object-fit:contain;">
+                    </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px; margin-top:10px;">
+                <!-- Selected Plan Summary Card (Instant Card button removed as requested) -->
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 16px; margin-top:10px;">
                     <div>
-                        <div style="font-size:11px; font-weight:700; color:#1e40af;">SELECTED PLAN TOTAL:</div>
-                        <div id="sub-display-total" style="font-size:18px; font-weight:900; color:#1d4ed8;">Rs. 2,500.00</div>
+                        <div style="font-size:11px; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:0.5px;">SELECTED PLAN TOTAL:</div>
+                        <div id="sub-display-total" style="font-size:20px; font-weight:900; color:#1d4ed8;">Rs. 2,500.00</div>
                     </div>
-                    <button type="button" class="btn-activate-subscription" onclick="simulateInstantCardPayment()" style="background:#2563eb;">
-                        ⚡ Instant Card Test Activation
-                    </button>
+                    <div id="sub-display-cycle-badge" style="font-size:12px; font-weight:800; color:#1e40af; background:#dbeafe; border:1px solid #93c5fd; padding:6px 12px; border-radius:8px;">
+                        ⏳ 30 Days Access
+                    </div>
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn-cancel" onclick="closeSubscriptionPaymentModal()">Cancel</button>
-                <button type="submit" class="btn-submit-modal">Submit Bank Slip</button>
+                <button type="submit" class="btn-submit-modal" id="btn-sub-submit">Submit</button>
             </div>
         </form>
     </div>
@@ -1757,16 +1874,13 @@
             <p class="auth-subtitle">Sri Lankan E-Commerce Operations & Order Management</p>
         </div>
 
-        <!-- 3 Auth Tabs -->
+        <!-- 2 Auth Tabs for Merchants -->
         <div class="auth-tabs">
             <button type="button" class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">
                 Sign In
             </button>
             <button type="button" class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">
                 ✨ 10-Day Free Demo
-            </button>
-            <button type="button" class="auth-tab-btn" id="tab-btn-admin" onclick="switchAuthTab('admin')">
-                🛡️ Admin
             </button>
         </div>
 
@@ -1815,22 +1929,7 @@
             </div>
         </form>
 
-        <!-- Tab 3: Super Admin Login -->
-        <form id="auth-admin-form" style="display:none;">
-            <div class="auth-form-group">
-                <label class="auth-form-label">ADMIN EMAIL</label>
-                <input type="email" class="auth-input" id="admin-email" value="admin@smartzone.lk" required>
-            </div>
-            <div class="auth-form-group">
-                <label class="auth-form-label">ADMIN PASSWORD</label>
-                <input type="password" class="auth-input" id="admin-password" value="admin123" required>
-            </div>
-            <button type="submit" class="btn-auth-submit" style="background:linear-gradient(135deg, #7e22ce, #6b21a8);">
-                🛡️ Enter Super Admin Console
-            </button>
-        </form>
-
-        <!-- Quick 1-Click Test Credentials Buttons -->
+        <!-- Quick 1-Click Test Credentials Buttons (Merchants Only) -->
         <div class="auth-quick-creds">
             <div class="auth-quick-title">⚡ Quick 1-Click Test Accounts:</div>
             <div class="auth-quick-buttons">
@@ -1840,10 +1939,23 @@
                 <button type="button" class="btn-quick-cred" onclick="quickFillLogin('expired@gmail.com', 'expired123')">
                     ⛔ Expired Trial (Blocked)
                 </button>
-                <button type="button" class="btn-quick-cred" onclick="quickFillLogin('admin@smartzone.lk', 'admin123')">
-                    👑 Super Admin
-                </button>
             </div>
+        </div>
+    </div>
+<!-- Modal: View Deposit Slip Image -->
+<div id="admin-receipt-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:550px;">
+        <div class="modal-head">
+            <h3>🧾 Deposit Receipt / Slip Preview</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAdminReceiptModal()">✕</button>
+        </div>
+        <div class="modal-body" style="text-align:center;">
+            <div id="receipt-modal-info" style="font-size:12.5px; color:#475569; margin-bottom:12px;"></div>
+            <img id="receipt-modal-img" src="" alt="Deposit Receipt" style="max-width:100%; max-height:450px; border-radius:8px; border:1px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.1); object-fit:contain;">
+        </div>
+        <div class="modal-footer">
+            <a id="receipt-modal-download" href="" download="deposit_slip.png" class="btn-cancel" style="text-decoration:none; font-weight:700;">⬇ Download Slip</a>
+            <button type="button" class="btn-cancel" onclick="closeAdminReceiptModal()">Close</button>
         </div>
     </div>
 </div>

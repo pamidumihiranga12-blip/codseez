@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal | Codseez OMS</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #060b18;
+            --card-bg: rgba(13, 22, 44, 0.85);
+            --card-border: rgba(99, 102, 241, 0.25);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --purple: #8b5cf6;
+            --cyan: #06b6d4;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 55%),
+                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 15% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Ambient grid pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 36px 36px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .admin-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 36px 32px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7),
+                        0 0 40px -10px rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .admin-card.shake {
+            animation: cardShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes cardShake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        .badge-restricted {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .pulse-dot-red {
+            width: 7px;
+            height: 7px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ef4444;
+            animation: pulseRed 1.8s infinite;
+        }
+
+        @keyframes pulseRed {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+        }
+
+        .header-icon-wrap {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.35);
+        }
+
+        .header-icon-wrap svg {
+            width: 30px;
+            height: 30px;
+            stroke: #a5b4fc;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.4px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: #cbd5e1;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper svg.field-icon {
+            position: absolute;
+            left: 14px;
+            width: 17px;
+            height: 17px;
+            stroke: #64748b;
+            pointer-events: none;
+            transition: stroke 0.2s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1.5px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 12px 14px 12px 42px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.95);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .form-input:focus + svg.field-icon {
+            stroke: var(--primary);
+        }
+
+        .toggle-pwd {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-pwd:hover {
+            color: #cbd5e1;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.5);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -4px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert-box {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #86efac;
+        }
+
+        .footer-note {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 11.5px;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-note a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-note a:hover {
+            color: #a5b4fc;
+            text-decoration: underline;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 10.5px;
+            color: #475569;
+            font-family: 'JetBrains Mono', monospace;
+            padding-top: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card" id="admin-card">
+        <div class="badge-restricted">
+            <span class="pulse-dot-red"></span>
+            Restricted Area • Super Admin Only
+        </div>
+
+        <div class="header-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        </div>
+
+        <h1>Codseez Super Admin</h1>
+        <p class="subtitle">Platform administration & multi-tenant store control console</p>
+
+        <div id="alert-box" class="alert-box"></div>
+
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label for="admin-email">Admin Email</label>
+                <div class="input-wrapper">
+                    <input type="email" id="admin-email" class="form-input" placeholder="smartzonelk101@gmail.com" required autocomplete="username" autofocus>
+                    <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="admin-password">Master Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="admin-password" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
+                    <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <button type="button" class="toggle-pwd" id="toggle-pwd" aria-label="Toggle password visibility">
+                        <svg id="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-submit">
+                <span id="btn-text">🔐 Authorize & Enter Console</span>
+                <span id="btn-spinner" class="spinner" style="display:none;"></span>
+            </button>
+        </form>
+
+        <div class="footer-note">
+            <a href="../index.html">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Return to Merchant Portal
+            </a>
+            <div class="security-badge">
+                <span>🔒 256-BIT ENCRYPTED</span>
+                <span>•</span>
+                <span>AUTHORIZED AUDIT LOGGED</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Official Super Admin Credentials configured by owner:
+        const ADMIN_EMAIL = 'smartzonelk101@gmail.com';
+        const ADMIN_PASS = '2007admin@';
+
+        const form = document.getElementById('admin-login-form');
+        const emailInput = document.getElementById('admin-email');
+        const passInput = document.getElementById('admin-password');
+        const alertBox = document.getElementById('alert-box');
+        const card = document.getElementById('admin-card');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const togglePwd = document.getElementById('toggle-pwd');
+
+        // Toggle password show/hide
+        togglePwd.addEventListener('click', () => {
+            const isPassword = passInput.type === 'password';
+            passInput.type = isPassword ? 'text' : 'password';
+            togglePwd.style.color = isPassword ? '#818cf8' : '#64748b';
+        });
+
+        function showAlert(msg, isError = true) {
+            alertBox.textContent = msg;
+            alertBox.className = 'alert-box ' + (isError ? 'alert-error' : 'alert-success');
+            alertBox.style.display = 'block';
+            if (isError) {
+                card.classList.remove('shake');
+                void card.offsetWidth; // trigger reflow
+                card.classList.add('shake');
+            }
+        }
+
+        // Check if already authenticated as Super Admin
+        try {
+            const curRaw = localStorage.getItem('sz_oms_current_user');
+            if (curRaw) {
+                const cur = JSON.parse(curRaw);
+                if (cur && cur.role === 'admin') {
+                    showAlert('👑 You are currently authenticated as Super Admin. Redirecting...', false);
+                    setTimeout(() => {
+                        window.location.href = '../index.html#admin';
+                    }, 800);
+                }
+            }
+        } catch (e) {}
+
+        // Handle Admin Authentication
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = (emailInput.value || '').trim().toLowerCase();
+            const pass = passInput.value || '';
+
+            btnSubmit.disabled = true;
+            btnText.textContent = 'Verifying security token...';
+            btnSpinner.style.display = 'inline-block';
+
+            setTimeout(() => {
+                if (email === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASS) {
+                    showAlert('🛡️ Authorization verified! Entering Super Admin Console...', false);
+                    btnText.textContent = 'Access Granted!';
+                    btnSpinner.style.display = 'none';
+
+                    // Update or initialize sz_oms_users to guarantee usr_admin is properly set
+                    try {
+                        let users = [];
+                        const raw = localStorage.getItem('sz_oms_users');
+                        if (raw) {
+                            try { users = JSON.parse(raw); } catch (e) { users = []; }
+                        }
+                        let admin = users.find(u => u.id === 'usr_admin' || u.role === 'admin');
+                        if (!admin) {
+                            admin = {
+                                id: 'usr_admin',
+                                name: 'SmartZone Admin',
+                                storeName: 'SmartZone Head Office',
+                                email: ADMIN_EMAIL,
+                                phone: '0786800086',
+                                password: ADMIN_PASS,
+                                role: 'admin',
+                                status: 'active',
+                                plan: 'Enterprise Lifetime',
+                                registeredAt: Date.now() - (30 * 86400000),
+                                expiresAt: null
+                            };
+                            users.unshift(admin);
+                        } else {
+                            admin.email = ADMIN_EMAIL;
+                            admin.password = ADMIN_PASS;
+                            admin.role = 'admin';
+                            admin.status = 'active';
+                        }
+                        localStorage.setItem('sz_oms_users', JSON.stringify(users));
+
+                        // Set active session as Super Admin
+                        localStorage.setItem('sz_oms_current_user', JSON.stringify(admin));
+                        sessionStorage.setItem('sz_oms_admin_redirect', 'page-admin');
+                    } catch (err) {
+                        console.error('Storage error:', err);
+                    }
+
+                    // Redirect to dashboard admin console
+                    setTimeout(() => {
+                        window.location.href = '../index.html#admin';
+                    }, 600);
+                } else {
+                    btnSubmit.disabled = false;
+                    btnText.textContent = '🔐 Authorize & Enter Console';
+                    btnSpinner.style.display = 'none';
+                    showAlert('❌ Access Denied: Invalid Admin Email or Master Password.');
+                    passInput.value = '';
+                    passInput.focus();
+                }
+            }, 450);
+        });
+    </script>
+</body>
+</html>
