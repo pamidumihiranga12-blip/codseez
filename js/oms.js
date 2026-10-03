@@ -139,9 +139,9 @@ const PaymentsStorage = {
                     userId: 'usr_demo',
                     storeName: 'Kasun Electronics',
                     plan: 'Monthly',
-                    amount: 2500,
-                    method: 'Bank Transfer (Commercial Bank)',
-                    ref: 'CB-88910482',
+                    amount: 1250,
+                    method: 'Bank Transfer (Bank of Ceylon)',
+                    ref: 'BOC-88910482',
                     date: '2026-10-02 11:20',
                     status: 'Pending'
                 },
@@ -150,7 +150,7 @@ const PaymentsStorage = {
                     userId: 'usr_admin',
                     storeName: 'SmartZone Head Office',
                     plan: '1 Year Pro',
-                    amount: 22000,
+                    amount: 12500,
                     method: 'Online Card Instant',
                     ref: 'CARD-TXN-90123',
                     date: '2026-10-01 09:15',
@@ -3308,32 +3308,48 @@ function initAuthPortal() {
 const BankAccountsStorage = {
     getAll() {
         const raw = localStorage.getItem('sz_oms_bank_accounts');
+        const defaultB1 = {
+            id: 'bank_1',
+            enabled: true,
+            bankName: 'Bank of Ceylon',
+            accountName: 'IPMD WIJEGUNAWARDHANA',
+            accountNumber: '95251938',
+            branch: 'Padaviya Branch'
+        };
+        const defaultB2 = {
+            id: 'bank_2',
+            enabled: false,
+            bankName: 'Commercial Bank of Ceylon',
+            accountName: 'SmartZone Solutions LK',
+            accountNumber: '',
+            branch: ''
+        };
         if (!raw) {
-            const defaults = [
-                {
-                    id: 'bank_1',
-                    enabled: true,
-                    bankName: 'Commercial Bank of Ceylon',
-                    accountName: 'SmartZone Solutions LK',
-                    accountNumber: '8010049281',
-                    branch: 'Padaviya Branch'
-                },
-                {
-                    id: 'bank_2',
-                    enabled: false,
-                    bankName: 'Bank of Ceylon (BOC)',
-                    accountName: 'SmartZone Solutions LK',
-                    accountNumber: '',
-                    branch: ''
-                }
-            ];
+            const defaults = [defaultB1, defaultB2];
             localStorage.setItem('sz_oms_bank_accounts', JSON.stringify(defaults));
+            localStorage.setItem('sz_oms_bank_migrated_v2', 'true');
             return defaults;
         }
-        return JSON.parse(raw);
+        try {
+            let banks = JSON.parse(raw);
+            if (Array.isArray(banks) && banks.length > 0) {
+                if (banks[0].bankName === 'Commercial Bank of Ceylon' || banks[0].accountName === 'SmartZone Solutions LK' || banks[0].accountNumber === '8010049281' || !localStorage.getItem('sz_oms_bank_migrated_v2')) {
+                    banks[0].bankName = 'Bank of Ceylon';
+                    banks[0].accountName = 'IPMD WIJEGUNAWARDHANA';
+                    banks[0].accountNumber = '95251938';
+                    banks[0].branch = 'Padaviya Branch';
+                    localStorage.setItem('sz_oms_bank_accounts', JSON.stringify(banks));
+                    localStorage.setItem('sz_oms_bank_migrated_v2', 'true');
+                }
+            }
+            return banks;
+        } catch (e) {
+            return [defaultB1, defaultB2];
+        }
     },
     saveAll(banks) {
         localStorage.setItem('sz_oms_bank_accounts', JSON.stringify(banks));
+        localStorage.setItem('sz_oms_bank_migrated_v2', 'true');
     }
 };
 
@@ -3341,20 +3357,32 @@ const BankAccountsStorage = {
 const SubscriptionPlans = {
     getAll() {
         const raw = localStorage.getItem('sz_oms_sub_plans');
+        const defaultPlans = {
+            monthly: 1250,
+            sixMonths: 6550,
+            oneYear: 12500,
+            lifetime: 15500
+        };
         if (!raw) {
-            const defaults = {
-                monthly: 2500,
-                sixMonths: 12000,
-                oneYear: 22000,
-                lifetime: 45000
-            };
-            localStorage.setItem('sz_oms_sub_plans', JSON.stringify(defaults));
-            return defaults;
+            localStorage.setItem('sz_oms_sub_plans', JSON.stringify(defaultPlans));
+            localStorage.setItem('sz_oms_sub_migrated_v2', 'true');
+            return defaultPlans;
         }
-        return JSON.parse(raw);
+        try {
+            let plans = JSON.parse(raw);
+            if (plans.monthly === 2500 || plans.lifetime === 45000 || !localStorage.getItem('sz_oms_sub_migrated_v2')) {
+                plans = { ...defaultPlans };
+                localStorage.setItem('sz_oms_sub_plans', JSON.stringify(plans));
+                localStorage.setItem('sz_oms_sub_migrated_v2', 'true');
+            }
+            return plans;
+        } catch (e) {
+            return defaultPlans;
+        }
     },
     save(plans) {
         localStorage.setItem('sz_oms_sub_plans', JSON.stringify(plans));
+        localStorage.setItem('sz_oms_sub_migrated_v2', 'true');
     }
 };
 
@@ -3518,7 +3546,7 @@ function setupSubscriptionPaymentModal() {
             }
 
             const plan = document.getElementById('sub-selected-plan').value || 'Monthly';
-            const amount = parseFloat(document.getElementById('sub-selected-amount').value || 2500);
+            const amount = parseFloat(document.getElementById('sub-selected-amount').value || 1250);
             const cycleText = document.getElementById('sub-selected-cycle')?.value || '30 Days Access';
             const ref = document.getElementById('sub-bank-ref').value.trim();
 
@@ -3649,9 +3677,9 @@ function setupAdminConsole() {
         const b1 = {
             id: 'bank_1',
             enabled: true,
-            bankName: document.getElementById('admin-bank1-name')?.value.trim() || 'Commercial Bank of Ceylon',
-            accountName: document.getElementById('admin-bank1-acc-name')?.value.trim() || 'SmartZone Solutions LK',
-            accountNumber: document.getElementById('admin-bank1-acc-num')?.value.trim() || '8010049281',
+            bankName: document.getElementById('admin-bank1-name')?.value.trim() || 'Bank of Ceylon',
+            accountName: document.getElementById('admin-bank1-acc-name')?.value.trim() || 'IPMD WIJEGUNAWARDHANA',
+            accountNumber: document.getElementById('admin-bank1-acc-num')?.value.trim() || '95251938',
             branch: document.getElementById('admin-bank1-branch')?.value.trim() || 'Padaviya Branch'
         };
 
@@ -3659,7 +3687,7 @@ function setupAdminConsole() {
         const b2 = {
             id: 'bank_2',
             enabled: !!b2Enabled,
-            bankName: document.getElementById('admin-bank2-name')?.value.trim() || 'Bank of Ceylon (BOC)',
+            bankName: document.getElementById('admin-bank2-name')?.value.trim() || 'Commercial Bank of Ceylon',
             accountName: document.getElementById('admin-bank2-acc-name')?.value.trim() || 'SmartZone Solutions LK',
             accountNumber: document.getElementById('admin-bank2-acc-num')?.value.trim() || '',
             branch: document.getElementById('admin-bank2-branch')?.value.trim() || ''
@@ -3678,20 +3706,20 @@ function setupAdminConsole() {
         const p1 = document.getElementById('admin-price-1year');
         const pL = document.getElementById('admin-price-lifetime');
 
-        if (pM) pM.value = prices.monthly || 2500;
-        if (p6) p6.value = prices.sixMonths || 12000;
-        if (p1) p1.value = prices.oneYear || 22000;
-        if (pL) pL.value = prices.lifetime || 45000;
+        if (pM) pM.value = prices.monthly || 1250;
+        if (p6) p6.value = prices.sixMonths || 6550;
+        if (p1) p1.value = prices.oneYear || 12500;
+        if (pL) pL.value = prices.lifetime || 15500;
 
         updateSubscriptionModalPlanCards();
     };
 
     window.saveAdminPricingPlans = function() {
         const prices = {
-            monthly: parseFloat(document.getElementById('admin-price-monthly')?.value || 2500),
-            sixMonths: parseFloat(document.getElementById('admin-price-6months')?.value || 12000),
-            oneYear: parseFloat(document.getElementById('admin-price-1year')?.value || 22000),
-            lifetime: parseFloat(document.getElementById('admin-price-lifetime')?.value || 45000)
+            monthly: parseFloat(document.getElementById('admin-price-monthly')?.value || 1250),
+            sixMonths: parseFloat(document.getElementById('admin-price-6months')?.value || 6550),
+            oneYear: parseFloat(document.getElementById('admin-price-1year')?.value || 12500),
+            lifetime: parseFloat(document.getElementById('admin-price-lifetime')?.value || 15500)
         };
 
         SubscriptionPlans.save(prices);
