@@ -427,8 +427,12 @@ function getSiteBaseUrl() {
 }
 
 function getCourierWebhookUrl(provider = 'fardar') {
-    const base = getSiteBaseUrl();
     const isTrans = (provider || '').toLowerCase().includes('trans');
+    const base = getSiteBaseUrl();
+    // Vercel and file protocol do not host PHP scripts. Direct courier webhooks to the production Apache/PHP endpoint
+    if (base.includes('vercel.app') || base.includes('localhost') || base.startsWith('file:')) {
+        return isTrans ? 'https://smartzonelk.lk/api/trans_express_webhook.php' : 'https://smartzonelk.lk/api/fardar_webhook.php';
+    }
     return isTrans ? `${base}/api/trans_express_webhook.php` : `${base}/api/fardar_webhook.php`;
 }
 
@@ -652,7 +656,7 @@ const SmsSettings = {
 
 // Automated SMS Dispatch Engine via SMSLENZ (Matching User Documentation)
 const SmsGateway = {
-    send(phone, message, gateway = 'SMSLENZ', senderId = '') {
+    async send(phone, message, gateway = 'SMSLENZ', senderId = '') {
         const smsSettings = SmsSettings.get();
         const activeGateway = gateway || smsSettings.gateway || 'SMSLENZ';
         const activeSender = senderId || smsSettings.senderId || 'SMART ZONE';
@@ -662,26 +666,52 @@ const SmsGateway = {
 
         console.log(`[${activeGateway} Live SMS Dispatch] To: ${formattedContact} | User: ${userId} | Sender: ${activeSender} | Message: ${message}`);
         
+        let sendResult = { success: true, messageId: `${activeGateway.slice(0, 3)}-${Date.now()}` };
+
         // Live Network Call to SMSLENZ (POST https://smslenz.lk/api/send-sms)
         if (activeGateway === 'SMSLENZ' && userId && apiKey) {
             try {
                 const payload = {
-                    user_id: userId,
-                    api_key: apiKey,
-                    sender_id: activeSender,
+                    user_id: String(userId).trim(),
+                    api_key: String(apiKey).trim(),
+                    sender_id: String(activeSender).trim(),
                     contact: formattedContact,
                     message: message
                 };
                 
-                // Direct POST request as specified in SMSlenz API documentation
-                fetch('https://smslenz.lk/api/send-sms', {
+                // Direct POST request to SMSLenz API (CORS enabled by SMSLenz server)
+                const response = await fetch('https://smslenz.lk/api/send-sms', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    mode: 'no-cors'
-                }).catch(e => console.warn('[SMSLENZ Live Dispatch Notice]', e));
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json().catch(() => ({}));
+                console.log('[SMSLENZ Live Dispatch Response]', data);
+                if (data && data.success) {
+                    const campId = data.data?.campaign_id || Math.floor(10000 + Math.random() * 90000);
+                    sendResult = {
+                        success: true,
+                        campaignId: campId,
+                        balance: data.data?.sms_credit_balance,
+                        messageId: `SMS-${campId}`
+                    };
+                    if (data.data?.sms_credit_balance) {
+                        smsSettings.balance = `Rs. ${data.data.sms_credit_balance}`;
+                        SmsSettings.save(smsSettings);
+                        const balBadge = document.getElementById('smslenz-balance-badge');
+                        if (balBadge) balBadge.textContent = `Main Balance: Rs. ${data.data.sms_credit_balance}`;
+                    }
+                } else {
+                    console.warn('[SMSLENZ Live Dispatch Error]', data?.message || response.statusText);
+                    sendResult = { success: false, error: data?.message || 'Failed to dispatch SMS' };
+                }
             } catch (err) {
-                console.warn('[SMSLENZ Dispatch Error]', err);
+                console.warn('[SMSLENZ Dispatch Network Error]', err);
+                sendResult = { success: false, error: err.message };
             }
         }
 
@@ -695,18 +725,19 @@ const SmsGateway = {
             const rawLogs = localStorage.getItem(logKey) || '[]';
             const logs = JSON.parse(rawLogs);
             logs.unshift({
-                id: 'SMS-' + Math.floor(10000 + Math.random() * 90000),
+                id: sendResult.messageId || ('SMS-' + Math.floor(10000 + Math.random() * 90000)),
                 phone: formattedContact,
                 gateway: activeGateway,
                 userId: userId,
                 sender: activeSender,
                 message: message,
+                campaignId: sendResult.campaignId || null,
                 date: new Date().toISOString().slice(0, 19).replace('T', ' ')
             });
             localStorage.setItem(logKey, JSON.stringify(logs.slice(0, 50)));
         } catch (e) {}
 
-        return { success: true, messageId: `${activeGateway.slice(0, 3)}-${Date.now()}` };
+        return sendResult;
     }
 };
 
@@ -1720,72 +1751,98 @@ window.filterProductsTable = function() {
     }).join('');
 };
 
-function setupProductModals() {
+// Product Modal Handlers
+function calcProductModalMargin() {
+    const cost = parseFloat(document.getElementById('modal-prod-cost')?.value || 0);
+    const price = parseFloat(document.getElementById('modal-prod-price')?.value || 0);
+    const calcEl = document.getElementById('modal-prod-margin-calc');
+    if (!calcEl) return;
+
+    if (price > 0) {
+        const profit = price - cost;
+        const margin = ((profit / price) * 100).toFixed(1);
+        calcEl.textContent = `${margin}% (Profit: Rs. ${profit.toLocaleString()})`;
+        calcEl.style.color = profit >= 0 ? '#166534' : '#ef4444';
+    } else {
+        calcEl.textContent = '0% (Rs. 0)';
+    }
+}
+window.calcProductModalMargin = calcProductModalMargin;
+
+window.openAddProductModal = function() {
     const modal = document.getElementById('add-product-modal');
     const form = document.getElementById('add-product-form');
+    if (!modal) return;
+    if (form) form.reset();
+    const origId = document.getElementById('modal-product-id-orig');
+    if (origId) origId.value = '';
+    const titleEl = document.getElementById('modal-product-title');
+    if (titleEl) titleEl.textContent = 'Add Product';
+    const btnSave = document.getElementById('btn-save-prod');
+    if (btnSave) btnSave.textContent = 'Save Product';
 
-    window.openAddProductModal = function() {
-        if (!modal || !form) return;
-        form.reset();
-        document.getElementById('modal-product-id-orig').value = '';
-        document.getElementById('modal-product-title').textContent = 'Add Product';
-        document.getElementById('btn-save-prod').textContent = 'Save Product';
+    // Auto-generate next Product ID
+    const prods = typeof ProductsStorage !== 'undefined' ? ProductsStorage.getAll() : [];
+    const prodIdEl = document.getElementById('modal-prod-id');
+    if (prodIdEl) prodIdEl.value = 'PRD-' + (100 + prods.length + 1);
+    const stockEl = document.getElementById('modal-prod-stock');
+    if (stockEl) stockEl.value = 20;
+    const weightEl = document.getElementById('modal-prod-weight');
+    if (weightEl) weightEl.value = 0.5;
+    calcProductModalMargin();
+    modal.classList.add('open');
+};
 
-        // Auto-generate next Product ID
-        const prods = ProductsStorage.getAll();
-        document.getElementById('modal-prod-id').value = 'PRD-' + (100 + prods.length + 1);
-        document.getElementById('modal-prod-stock').value = 20;
-        document.getElementById('modal-prod-weight').value = 0.5;
-        calcProductModalMargin();
-        modal.classList.add('open');
-    };
+window.openEditProductModal = function(id) {
+    const p = typeof ProductsStorage !== 'undefined' ? ProductsStorage.getById(id) : null;
+    const modal = document.getElementById('add-product-modal');
+    if (!p || !modal) return;
 
-    window.openEditProductModal = function(id) {
-        const p = ProductsStorage.getById(id);
-        if (!p || !modal) return;
+    const origId = document.getElementById('modal-product-id-orig');
+    if (origId) origId.value = p.id;
+    const titleEl = document.getElementById('modal-product-title');
+    if (titleEl) titleEl.textContent = 'Edit Product';
+    const btnSave = document.getElementById('btn-save-prod');
+    if (btnSave) btnSave.textContent = 'Update Product';
 
-        document.getElementById('modal-product-id-orig').value = p.id;
-        document.getElementById('modal-product-title').textContent = 'Edit Product';
-        document.getElementById('btn-save-prod').textContent = 'Update Product';
+    const prodIdEl = document.getElementById('modal-prod-id');
+    if (prodIdEl) prodIdEl.value = p.id;
+    const nameEl = document.getElementById('modal-prod-name');
+    if (nameEl) nameEl.value = p.name;
+    const catEl = document.getElementById('modal-prod-category');
+    if (catEl) catEl.value = p.category || 'Electronics';
+    const costEl = document.getElementById('modal-prod-cost');
+    if (costEl) costEl.value = p.cost;
+    const priceEl = document.getElementById('modal-prod-price');
+    if (priceEl) priceEl.value = p.price;
+    const stockEl = document.getElementById('modal-prod-stock');
+    if (stockEl) stockEl.value = p.stock;
+    const weightEl = document.getElementById('modal-prod-weight');
+    if (weightEl) weightEl.value = p.weight || 0.5;
 
-        document.getElementById('modal-prod-id').value = p.id;
-        document.getElementById('modal-prod-name').value = p.name;
-        document.getElementById('modal-prod-category').value = p.category || 'Electronics';
-        document.getElementById('modal-prod-cost').value = p.cost;
-        document.getElementById('modal-prod-price').value = p.price;
-        document.getElementById('modal-prod-stock').value = p.stock;
-        document.getElementById('modal-prod-weight').value = p.weight || 0.5;
+    calcProductModalMargin();
+    modal.classList.add('open');
+};
 
-        calcProductModalMargin();
-        modal.classList.add('open');
-    };
+window.closeAddProductModal = function() {
+    const modal = document.getElementById('add-product-modal');
+    if (modal) modal.classList.remove('open');
+};
 
-    window.closeAddProductModal = function() {
-        if (modal) modal.classList.remove('open');
-    };
+window.deleteProduct = function(id) {
+    if (confirm(`Delete product ${id}?`)) {
+        if (typeof ProductsStorage !== 'undefined') ProductsStorage.delete(id);
+        if (typeof renderProductsView === 'function') renderProductsView();
+    }
+};
 
-    window.calcProductModalMargin = function() {
-        const cost = parseFloat(document.getElementById('modal-prod-cost')?.value || 0);
-        const price = parseFloat(document.getElementById('modal-prod-price')?.value || 0);
-        const calcEl = document.getElementById('modal-prod-margin-calc');
-        if (!calcEl) return;
+function setupProductModals() {
+    const form = document.getElementById('add-product-form');
+    const costInput = document.getElementById('modal-prod-cost');
+    const priceInput = document.getElementById('modal-prod-price');
 
-        if (price > 0) {
-            const profit = price - cost;
-            const margin = ((profit / price) * 100).toFixed(1);
-            calcEl.textContent = `${margin}% (Profit: Rs. ${profit.toLocaleString()})`;
-            calcEl.style.color = profit >= 0 ? '#166534' : '#ef4444';
-        } else {
-            calcEl.textContent = '0% (Rs. 0)';
-        }
-    };
-
-    window.deleteProduct = function(id) {
-        if (confirm(`Delete product ${id}?`)) {
-            ProductsStorage.delete(id);
-            renderProductsView();
-        }
-    };
+    if (costInput) costInput.addEventListener('input', calcProductModalMargin);
+    if (priceInput) priceInput.addEventListener('input', calcProductModalMargin);
 
     if (form) {
         form.addEventListener('submit', (e) => {
@@ -2395,9 +2452,13 @@ window.openAddDeliveryServiceModal = function() {
 };
 
 window.openEditDeliveryServiceModal = function(id) {
-    const item = typeof DeliveryServices !== 'undefined' ? DeliveryServices.getById(id) : null;
     const modal = document.getElementById('add-delivery-service-modal');
-    if (!item || !modal) return;
+    if (!modal) return;
+    const item = typeof DeliveryServices !== 'undefined' ? DeliveryServices.getById(id) : null;
+    if (!item) {
+        window.openAddDeliveryServiceModal();
+        return;
+    }
 
     const idEl = document.getElementById('modal-ds-id');
     if (idEl) idEl.value = item.id;
@@ -2489,7 +2550,9 @@ window.openAddBrandModal = function() {
         const trimmed = newBrand.trim();
         if (user) {
             user.storeName = trimmed;
-            Auth.saveUser(user);
+            if (typeof Auth !== 'undefined' && Auth.setCurrentUser) {
+                Auth.setCurrentUser(user);
+            }
         }
         localStorage.setItem(`sz_oms_${getActiveMerchantId()}_brand`, trimmed);
         renderBrandsList();
@@ -2594,10 +2657,14 @@ window.openSmsSettingsModal = function() {
     const statusBox = document.getElementById('smslenz-status-box');
     if (balBadge) {
         if (data.userId && data.apiKey) {
-            balBadge.textContent = `Main Balance: ${data.balance || 'Rs. 1,822.38'}`;
+            balBadge.textContent = `Main Balance: ${data.balance || 'Checking...'}`;
             balBadge.style.color = '#065f46';
             balBadge.style.background = '#d1fae5';
             if (statusBox) statusBox.style.display = 'block';
+            // Live query real-time credit balance from SMSLenz API
+            if (typeof fetchSmsLenzLiveBalance === 'function') {
+                fetchSmsLenzLiveBalance(data.userId, data.apiKey);
+            }
         } else {
             balBadge.textContent = 'Status: Not Configured';
             balBadge.style.color = '#94a3b8';
@@ -2607,6 +2674,49 @@ window.openSmsSettingsModal = function() {
 
     updateSmsLivePreview();
     modal.classList.add('open');
+};
+
+// Live SMSLenz Account Status & Balance Fetcher
+window.fetchSmsLenzLiveBalance = async function(userId, apiKey) {
+    const uId = userId || document.getElementById('sms-user-id')?.value.trim() || SmsSettings.get().userId;
+    const aKey = apiKey || document.getElementById('sms-api-token')?.value.trim() || SmsSettings.get().apiKey;
+    const balBadge = document.getElementById('smslenz-balance-badge');
+    const statusBox = document.getElementById('smslenz-status-box');
+
+    if (!uId || !aKey || !balBadge) return;
+
+    try {
+        const response = await fetch('https://smslenz.lk/api/account-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: String(uId).trim(),
+                api_key: String(aKey).trim()
+            })
+        });
+
+        const resData = await response.json().catch(() => ({}));
+        console.log('[SMSLenz Live Account Status]', resData);
+
+        if (resData && resData.success && resData.data?.sms_credit_balance) {
+            const bal = resData.data.sms_credit_balance;
+            balBadge.textContent = `Main Balance: Rs. ${bal}`;
+            if (balBadge.style) {
+                balBadge.style.color = '#065f46';
+                balBadge.style.background = '#d1fae5';
+            }
+            if (statusBox && statusBox.style) statusBox.style.display = 'block';
+
+            const s = SmsSettings.get();
+            s.balance = `Rs. ${bal}`;
+            SmsSettings.save(s);
+        }
+    } catch (err) {
+        console.log('[SMSLenz Balance Check Notice]', err.message);
+    }
 };
 
 window.closeSmsSettingsModal = function() {
@@ -2641,17 +2751,17 @@ window.handleGatewayChange = function() {
     updateSmsLivePreview();
 };
 
-window.sendTestSmsMessage = function() {
+window.sendTestSmsMessage = async function() {
     const phoneInput = document.getElementById('sms-test-phone');
     const statusEl = document.getElementById('sms-test-status');
     const gateway = document.getElementById('sms-gateway-select')?.value || 'SMSLENZ';
     const userId = document.getElementById('sms-user-id')?.value.trim() || '';
-    const apiKey = document.getElementById('sms-api-token')?.value || '';
-    const sender = document.getElementById('sms-sender-id')?.value || 'SmartZone';
+    const apiKey = document.getElementById('sms-api-token')?.value.trim() || '';
+    const sender = document.getElementById('sms-sender-id')?.value.trim() || 'SMART ZONE';
 
-    const phone = phoneInput ? phoneInput.value.trim() : '';
-    if (!phone || phone.length < 10) {
-        alert('Please enter a valid 10-digit mobile number (e.g. 07XXXXXXXX)');
+    const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+    if (!rawPhone || rawPhone.length < 9) {
+        alert('Please enter a valid mobile number (e.g. 0786800086)');
         return;
     }
 
@@ -2660,27 +2770,84 @@ window.sendTestSmsMessage = function() {
         return;
     }
 
+    const formattedContact = formatSmsLenzContact(rawPhone);
+
     if (statusEl) {
-        statusEl.innerHTML = `<span style="color:#0284c7;">⏳ Dispatching test SMS via ${gateway} to ${phone} (User: ${userId || 'N/A'})...</span>`;
+        statusEl.innerHTML = `<span style="color:#0284c7; font-weight:600;">⏳ Dispatching live test SMS to ${formattedContact} via ${gateway}...</span>`;
     }
 
-    setTimeout(() => {
-        if (statusEl) {
-            statusEl.innerHTML = `<span style="color:#16a34a; font-weight:700;">✅ Success: Test SMS dispatched to ${phone} via ${gateway}! (Sender: ${sender}, Message ID: ${gateway.slice(0,3)}-${Math.floor(10000 + Math.random()*90000)})</span>`;
+    try {
+        const payload = {
+            user_id: String(userId).trim(),
+            api_key: String(apiKey).trim(),
+            sender_id: String(sender).trim(),
+            contact: formattedContact,
+            message: `SmartZone Test SMS: Gateway connection verified successfully for ${sender}!`
+        };
+
+        const response = await fetch('https://smslenz.lk/api/send-sms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        console.log('[SMSLENZ Live Test SMS Response]', data);
+
+        if (data && data.success) {
+            const campId = data.data?.campaign_id || Math.floor(10000 + Math.random() * 90000);
+            const bal = data.data?.sms_credit_balance;
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#16a34a; font-weight:700;">✅ Success: Test SMS dispatched to ${formattedContact} via ${gateway}! (Campaign ID: #${campId}, Sender: ${sender})</span>`;
+            }
+            if (bal) {
+                const balBadge = document.getElementById('smslenz-balance-badge');
+                if (balBadge) {
+                    balBadge.textContent = `Main Balance: Rs. ${bal}`;
+                }
+                const smsSettings = SmsSettings.get();
+                smsSettings.balance = `Rs. ${bal}`;
+                SmsSettings.save(smsSettings);
+            }
+        } else {
+            const err = data?.message || (data?.data && typeof data.data === 'string' ? data.data : 'Gateway returned error');
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#dc2626; font-weight:700;">❌ Delivery Failed: ${err}</span>`;
+            }
         }
-    }, 500);
+    } catch (err) {
+        console.error('[SMSLENZ Test Error]', err);
+        if (statusEl) {
+            statusEl.innerHTML = `<span style="color:#dc2626; font-weight:700;">❌ Network Error: ${err.message}. Please check connection.</span>`;
+        }
+    }
 };
 
 function setupSmsSettingsModal() {
     const form = document.getElementById('sms-settings-form');
     const msgInput = document.getElementById('sms-dispatch-message');
     const senderInput = document.getElementById('sms-sender-id');
+    const userIdInput = document.getElementById('sms-user-id');
+    const tokenInput = document.getElementById('sms-api-token');
 
     if (msgInput) {
         msgInput.addEventListener('input', updateSmsLivePreview);
     }
     if (senderInput) {
         senderInput.addEventListener('input', updateSmsLivePreview);
+    }
+    if (userIdInput) {
+        userIdInput.addEventListener('blur', () => {
+            if (typeof fetchSmsLenzLiveBalance === 'function') fetchSmsLenzLiveBalance();
+        });
+    }
+    if (tokenInput) {
+        tokenInput.addEventListener('blur', () => {
+            if (typeof fetchSmsLenzLiveBalance === 'function') fetchSmsLenzLiveBalance();
+        });
     }
 
     if (form) {
@@ -2712,45 +2879,52 @@ function setupSmsSettingsModal() {
 // ========================================================
 // 14. AUTHENTICATION & LOGIN PORTAL CONTROLLER
 // ========================================================
-function initAuthPortal() {
-    const overlay = document.getElementById('auth-portal-overlay');
+// Authentication & Portal Controllers
+function switchAuthTab(tab) {
     const loginForm = document.getElementById('auth-login-form');
     const regForm = document.getElementById('auth-register-form');
     const adminForm = document.getElementById('auth-admin-form');
 
-    window.openAuthPortal = function(tab = 'login') {
-        if (!overlay) return;
-        switchAuthTab(tab);
-        overlay.classList.add('open');
-    };
+    document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+    if (loginForm) loginForm.style.display = 'none';
+    if (regForm) regForm.style.display = 'none';
+    if (adminForm) adminForm.style.display = 'none';
 
-    window.closeAuthPortal = function() {
-        if (!overlay) return;
-        overlay.classList.remove('open');
-    };
+    const btn = document.getElementById('tab-btn-' + tab);
+    if (btn) btn.classList.add('active');
 
-    window.switchAuthTab = function(tab) {
-        document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
-        if (loginForm) loginForm.style.display = 'none';
-        if (regForm) regForm.style.display = 'none';
-        if (adminForm) adminForm.style.display = 'none';
+    if (tab === 'login' && loginForm) loginForm.style.display = 'block';
+    if (tab === 'register' && regForm) regForm.style.display = 'block';
+    if (tab === 'admin' && adminForm) adminForm.style.display = 'block';
+}
+window.switchAuthTab = switchAuthTab;
 
-        const btn = document.getElementById('tab-btn-' + tab);
-        if (btn) btn.classList.add('active');
+window.openAuthPortal = function(tab = 'login') {
+    const overlay = document.getElementById('auth-portal-overlay');
+    if (!overlay) return;
+    switchAuthTab(tab);
+    overlay.classList.add('open');
+};
 
-        if (tab === 'login' && loginForm) loginForm.style.display = 'block';
-        if (tab === 'register' && regForm) regForm.style.display = 'block';
-        if (tab === 'admin' && adminForm) adminForm.style.display = 'block';
-    };
+window.closeAuthPortal = function() {
+    const overlay = document.getElementById('auth-portal-overlay');
+    if (overlay) overlay.classList.remove('open');
+};
 
-    window.quickFillLogin = function(email, pass) {
-        switchAuthTab('login');
-        const emailInput = document.getElementById('login-email');
-        const passInput = document.getElementById('login-password');
-        if (emailInput) emailInput.value = email;
-        if (passInput) passInput.value = pass;
-        if (loginForm) loginForm.dispatchEvent(new Event('submit'));
-    };
+window.quickFillLogin = function(email, pass) {
+    switchAuthTab('login');
+    const loginForm = document.getElementById('auth-login-form');
+    const emailInput = document.getElementById('login-email');
+    const passInput = document.getElementById('login-password');
+    if (emailInput) emailInput.value = email;
+    if (passInput) passInput.value = pass;
+    if (loginForm) loginForm.dispatchEvent(new Event('submit'));
+};
+
+function initAuthPortal() {
+    const loginForm = document.getElementById('auth-login-form');
+    const regForm = document.getElementById('auth-register-form');
+    const adminForm = document.getElementById('auth-admin-form');
 
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -3195,9 +3369,9 @@ window.executeDataExport = function() {
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute("href", jsonStr);
     dlAnchor.setAttribute("download", `SmartZone_Codseez_Export_${new Date().toISOString().slice(0,10)}.json`);
-    document.body.appendChild(dlAnchor);
+    if (document.body) document.body.appendChild(dlAnchor);
     dlAnchor.click();
-    dlAnchor.remove();
+    if (document.body) dlAnchor.remove();
 
     alert('Export generated and downloaded successfully!');
 };

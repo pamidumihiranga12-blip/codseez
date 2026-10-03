@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/fardar_webhook.php",
+      "destination": "/api/fardar_webhook.js"
+    },
+    {
+      "source": "/api/trans_express_webhook.php",
+      "destination": "/api/trans_express_webhook.js"
+    },
+    {
+      "source": "/api/fardar_webhook",
+      "destination": "/api/fardar_webhook.js"
+    },
+    {
+      "source": "/api/trans_express_webhook",
+      "destination": "/api/trans_express_webhook.js"
+    }
+  ]
+}
