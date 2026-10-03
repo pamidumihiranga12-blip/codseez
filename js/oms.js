@@ -413,27 +413,41 @@ function getActiveMerchantId() {
 // Dynamic Website Domain & Courier Reverse API Webhook Endpoints
 function getSiteBaseUrl() {
     if (typeof window !== 'undefined' && window.location) {
-        if (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) {
+        const proto = window.location.protocol || '';
+        if (!proto.startsWith('file:') && window.location.origin && window.location.origin !== 'null') {
             return window.location.origin;
         }
-        if (window.location.host && !window.location.protocol.startsWith('file:')) {
-            return `${window.location.protocol}//${window.location.host}`;
-        }
-        if (window.location.hostname) {
-            return `https://${window.location.hostname}`;
+        if (!proto.startsWith('file:') && window.location.host) {
+            return `${proto}//${window.location.host}`;
         }
     }
+    // Absolute fallback for file:// or unknown environments
     return 'https://smartzonelk.lk';
 }
 
 function getCourierWebhookUrl(provider = 'fardar') {
     const isTrans = (provider || '').toLowerCase().includes('trans');
     const base = getSiteBaseUrl();
-    // Vercel and file protocol do not host PHP scripts. Direct courier webhooks to the production Apache/PHP endpoint
-    if (base.includes('vercel.app') || base.includes('localhost') || base.startsWith('file:')) {
-        return isTrans ? 'https://smartzonelk.lk/api/trans_express_webhook.php' : 'https://smartzonelk.lk/api/fardar_webhook.php';
+
+    // file:// local open — use production smartzonelk.lk PHP endpoints
+    if (base === 'https://smartzonelk.lk' || base.startsWith('file:')) {
+        return isTrans
+            ? 'https://smartzonelk.lk/api/trans_express_webhook.php'
+            : 'https://smartzonelk.lk/api/fardar_webhook.php';
     }
-    return isTrans ? `${base}/api/trans_express_webhook.php` : `${base}/api/fardar_webhook.php`;
+
+    // Vercel deployments (vercel.app, preview URLs, custom domains) — use JS serverless endpoints (no .php)
+    if (base.includes('vercel.app') || base.includes('localhost')) {
+        return isTrans
+            ? `${base}/api/trans_express_webhook`
+            : `${base}/api/fardar_webhook`;
+    }
+
+    // Any other host (custom domain on Vercel or Apache) — auto-detect
+    // Try serverless style first (Vercel custom domain), fallback handled by caller if needed
+    return isTrans
+        ? `${base}/api/trans_express_webhook`
+        : `${base}/api/fardar_webhook`;
 }
 
 // Format Phone Number to E.164 required by SMSLENZ API (+947XXXXXXXX)
@@ -2610,6 +2624,12 @@ function handleProviderChange() {
     if (webhookInput && typeof getCourierWebhookUrl === 'function') {
         webhookInput.value = getCourierWebhookUrl(provider);
     }
+
+    // Update the hint list URLs dynamically so they always reflect the live domain
+    const hintFardar = document.getElementById('hint-fardar-url');
+    const hintTrans = document.getElementById('hint-trans-url');
+    if (hintFardar) hintFardar.textContent = getCourierWebhookUrl('fardar');
+    if (hintTrans) hintTrans.textContent = getCourierWebhookUrl('trans');
 
     if (provider.includes('Fardar')) {
         if (clientHint) clientHint.textContent = 'Fardar Client ID (e.g. 5980) - Required';
