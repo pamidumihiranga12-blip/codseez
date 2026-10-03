@@ -1,4 +1,323 @@
 // ========================================================
+// MODERN TOAST & USER-FRIENDLY DIALOG SYSTEM
+// ========================================================
+const Toast = {
+    container: null,
+    init() {
+        if (!this.container && document.body) {
+            let el = document.getElementById('app-toast-container');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'app-toast-container';
+                document.body.appendChild(el);
+            }
+            this.container = el;
+        }
+        return this.container;
+    },
+    show({ title = '', message = '', type = 'info', duration = 3800, icon = null }) {
+        this.init();
+        if (!this.container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `app-toast toast-${type}`;
+
+        const iconMap = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        const displayIcon = icon || iconMap[type] || 'ℹ️';
+
+        toast.innerHTML = `
+            <div class="app-toast-icon-wrap">${displayIcon}</div>
+            <div class="app-toast-body">
+                ${title ? `<div class="app-toast-title">${escapeHtml(title)}</div>` : ''}
+                <div class="app-toast-message">${escapeHtml(message)}</div>
+            </div>
+            <button type="button" class="app-toast-close" title="Close">✕</button>
+            <div class="app-toast-progress"></div>
+        `;
+
+        const closeBtn = toast.querySelector('.app-toast-close');
+        const progress = toast.querySelector('.app-toast-progress');
+
+        const dismiss = () => {
+            if (toast.classList.contains('toast-hiding')) return;
+            toast.classList.add('toast-hiding');
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+        };
+
+        if (closeBtn) closeBtn.onclick = dismiss;
+
+        if (progress) {
+            progress.style.transition = `transform ${duration}ms linear`;
+            progress.style.transform = 'scaleX(1)';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    progress.style.transform = 'scaleX(0)';
+                });
+            });
+        }
+
+        const timer = setTimeout(dismiss, duration);
+
+        toast.addEventListener('mouseenter', () => {
+            clearTimeout(timer);
+            if (progress) progress.style.transition = 'none';
+        });
+
+        toast.addEventListener('mouseleave', () => {
+            setTimeout(dismiss, 1200);
+        });
+
+        this.container.appendChild(toast);
+    },
+    success(message, title = 'Success') {
+        this.show({ title, message, type: 'success', icon: '✓' });
+    },
+    error(message, title = 'Error') {
+        this.show({ title, message, type: 'error', icon: '✕' });
+    },
+    warning(message, title = 'Warning') {
+        this.show({ title, message, type: 'warning', icon: '⚠️' });
+    },
+    info(message, title = 'Notice') {
+        this.show({ title, message, type: 'info', icon: 'ℹ️' });
+    },
+    fromAlert(rawMsg) {
+        if (!rawMsg) return;
+        const msg = String(rawMsg).trim();
+
+        // Check if message is multi-line with structured data (like user account summary or receipt details)
+        const lines = msg.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length >= 4 && !msg.startsWith('✅') && !msg.startsWith('🎉')) {
+            AppDialog.alert({
+                title: lines[0],
+                message: lines.slice(1).join('\n'),
+                type: 'info',
+                icon: '👤'
+            });
+            return;
+        }
+
+        let type = 'info';
+        let title = '';
+        let icon = null;
+        let cleanMsg = msg;
+
+        if (msg.startsWith('✅')) {
+            type = 'success';
+            icon = '✓';
+            cleanMsg = msg.replace(/^✅\s*/, '');
+            title = 'Completed';
+        } else if (msg.startsWith('❌')) {
+            type = 'error';
+            icon = '✕';
+            cleanMsg = msg.replace(/^❌\s*/, '');
+            title = 'Error';
+        } else if (msg.startsWith('⚠️')) {
+            type = 'warning';
+            icon = '⚠️';
+            cleanMsg = msg.replace(/^⚠️\s*/, '');
+            title = 'Attention';
+        } else if (msg.startsWith('🎉')) {
+            type = 'success';
+            icon = '🎉';
+            cleanMsg = msg.replace(/^🎉\s*/, '');
+            title = 'Welcome!';
+        } else if (msg.startsWith('🛡️') || msg.startsWith('👑')) {
+            type = 'info';
+            icon = '🛡️';
+            cleanMsg = msg.replace(/^[🛡️👑]\s*/, '');
+            title = 'Admin Console';
+        } else if (msg.startsWith('📋') || msg.startsWith('🔗')) {
+            type = 'success';
+            icon = '📋';
+            cleanMsg = msg.replace(/^[📋🔗]\s*/, '');
+            title = 'Copied to Clipboard';
+        }
+
+        this.show({ title, message: cleanMsg, type, icon });
+    }
+};
+
+const AppDialog = {
+    overlay: null,
+    init() {
+        if (!this.overlay && document.body) {
+            let el = document.getElementById('app-dialog-overlay');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'app-dialog-overlay';
+                document.body.appendChild(el);
+            }
+            this.overlay = el;
+        }
+        return this.overlay;
+    },
+    confirm({
+        title = 'Confirmation Required',
+        message = 'Are you sure you want to continue?',
+        items = [],
+        type = 'warning',
+        icon = '⚠️',
+        confirmText = 'Proceed',
+        cancelText = 'Cancel',
+        confirmClass = ''
+    }) {
+        return new Promise((resolve) => {
+            this.init();
+            if (!this.overlay) {
+                resolve(window.confirm(message));
+                return;
+            }
+
+            const isDanger = type === 'danger' || confirmClass.includes('danger');
+            const isWarning = type === 'warning' || confirmClass.includes('warning');
+            const btnClass = isDanger ? 'btn-confirm-danger' : (isWarning ? 'btn-confirm-warning' : 'btn-confirm-primary');
+
+            let itemsHtml = '';
+            if (Array.isArray(items) && items.length > 0) {
+                itemsHtml = `
+                    <div class="app-dialog-items-box">
+                        ${items.map(it => `
+                            <div class="app-dialog-item-row">
+                                <span class="app-dialog-item-bullet">⚠️</span>
+                                <span>${escapeHtml(it)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            this.overlay.innerHTML = `
+                <div class="app-dialog-card dialog-${type}">
+                    <div class="app-dialog-icon-badge">${icon}</div>
+                    <div class="app-dialog-title">${escapeHtml(title)}</div>
+                    <div class="app-dialog-message">${escapeHtml(message)}</div>
+                    ${itemsHtml}
+                    <div class="app-dialog-actions">
+                        <button type="button" class="btn-dialog-cancel" id="btn-dialog-cancel-action">${escapeHtml(cancelText)}</button>
+                        <button type="button" class="btn-dialog-confirm ${btnClass}" id="btn-dialog-confirm-action">${escapeHtml(confirmText)}</button>
+                    </div>
+                </div>
+            `;
+
+            this.overlay.classList.add('active');
+
+            const cleanup = (result) => {
+                this.overlay.classList.remove('active');
+                setTimeout(() => {
+                    this.overlay.innerHTML = '';
+                }, 200);
+                document.removeEventListener('keydown', keyHandler);
+                resolve(result);
+            };
+
+            const confirmBtn = document.getElementById('btn-dialog-confirm-action');
+            const cancelBtn = document.getElementById('btn-dialog-cancel-action');
+
+            if (confirmBtn) confirmBtn.onclick = () => cleanup(true);
+            if (cancelBtn) cancelBtn.onclick = () => cleanup(false);
+
+            this.overlay.onclick = (e) => {
+                if (e.target === this.overlay) cleanup(false);
+            };
+
+            const keyHandler = (e) => {
+                if (e.key === 'Escape') cleanup(false);
+                else if (e.key === 'Enter') cleanup(true);
+            };
+            document.addEventListener('keydown', keyHandler);
+        });
+    },
+    alert({
+        title = 'Notice',
+        message = '',
+        items = [],
+        type = 'info',
+        icon = 'ℹ️',
+        confirmText = 'OK, Understood'
+    }) {
+        return new Promise((resolve) => {
+            this.init();
+            if (!this.overlay) {
+                Toast.show({ title, message, type });
+                resolve();
+                return;
+            }
+
+            let itemsHtml = '';
+            if (Array.isArray(items) && items.length > 0) {
+                itemsHtml = `
+                    <div class="app-dialog-items-box">
+                        ${items.map(it => `
+                            <div class="app-dialog-item-row">
+                                <span class="app-dialog-item-bullet">•</span>
+                                <span>${escapeHtml(it)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            this.overlay.innerHTML = `
+                <div class="app-dialog-card dialog-${type}">
+                    <div class="app-dialog-icon-badge">${icon}</div>
+                    <div class="app-dialog-title">${escapeHtml(title)}</div>
+                    <div class="app-dialog-message">${escapeHtml(message)}</div>
+                    ${itemsHtml}
+                    <div class="app-dialog-actions">
+                        <button type="button" class="btn-dialog-confirm btn-confirm-primary" id="btn-dialog-ok-action">${escapeHtml(confirmText)}</button>
+                    </div>
+                </div>
+            `;
+
+            this.overlay.classList.add('active');
+
+            const cleanup = () => {
+                this.overlay.classList.remove('active');
+                setTimeout(() => {
+                    this.overlay.innerHTML = '';
+                }, 200);
+                document.removeEventListener('keydown', keyHandler);
+                resolve();
+            };
+
+            const okBtn = document.getElementById('btn-dialog-ok-action');
+            if (okBtn) okBtn.onclick = cleanup;
+            this.overlay.onclick = (e) => {
+                if (e.target === this.overlay) cleanup();
+            };
+
+            const keyHandler = (e) => {
+                if (e.key === 'Escape' || e.key === 'Enter') cleanup();
+            };
+            document.addEventListener('keydown', keyHandler);
+        });
+    }
+};
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Override native window.alert to automatically use modern Toast/Dialog
+window.alert = function(msg) {
+    Toast.fromAlert(msg);
+};
+
+// ========================================================
 // 0. USERS & 10-DAY TRIAL REPOSITORY
 // ========================================================
 const UsersStorage = {
@@ -239,7 +558,7 @@ const Auth = {
                     success: false,
                     expired: true,
                     user,
-                    message: '⚠️ Your 10-Day Free Trial has expired! Log-in is blocked.\n\nPlease activate your subscription to continue using Codseez OMS.'
+                    message: '⚠️ Your 10-Day Free Trial has expired! Log-in is blocked.\n\nPlease activate your subscription to continue using CodFlow OMS.'
                 };
             }
         }
@@ -417,9 +736,18 @@ const Auth = {
     }
 };
 
-window.handleUserSignOut = function() {
-    if (confirm('Are you sure you want to sign out from SmartZone OMS?')) {
+window.handleUserSignOut = async function() {
+    const ok = await AppDialog.confirm({
+        title: 'Sign Out from CodFlow OMS?',
+        message: 'Are you sure you want to end your current session?',
+        type: 'danger',
+        icon: '🚪',
+        confirmText: 'Yes, Sign Out',
+        cancelText: 'Stay Logged In'
+    });
+    if (ok) {
         Auth.logout();
+        Toast.info('Signed out successfully.');
     }
 };
 
@@ -427,7 +755,13 @@ window.showCurrentUserStatus = function() {
     const user = Auth.getCurrentUser();
     if (!user) return;
     const days = Auth.getDaysLeft(user);
-    alert(`👤 Logged In: ${user.name}\n🏪 Store: ${user.storeName || '-'}\n📱 Mobile: ${user.phone}\n✉️ Email: ${user.email}\n🏷️ Status: ${user.status.toUpperCase()} (${user.plan})\n${days !== null ? `⏳ Days Left: ${days} days` : '♾️ Unlimited Access'}`);
+    AppDialog.alert({
+        title: user.storeName || user.name,
+        message: `Owner Name: ${user.name}\nMobile Contact: ${user.phone}\nAccount Email: ${user.email}\nSubscription: ${user.status.toUpperCase()} (${user.plan})\nAccess Remaining: ${days !== null ? `${days} Days Left` : 'Unlimited Lifetime Access'}`,
+        type: 'info',
+        icon: '👤',
+        confirmText: 'Close'
+    });
 };
 
 // ========================================================
@@ -787,7 +1121,7 @@ const CourierApi = {
                 customer_phone2: phone2,
                 cod_amount: Number(orderData.total || 0),
                 city: orderData.city || 'Padaviya',
-                remarks: 'SmartZone Codseez OMS'
+                remarks: 'SmartZone CodFlow OMS'
             }
         ];
 
@@ -1356,7 +1690,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             task();
         } catch (e) {
-            console.error(`[Codseez OMS Init] Error in ${name}:`, e);
+            console.error(`[CodFlow OMS Init] Error in ${name}:`, e);
         }
     });
 
@@ -1397,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch(e) {}
         }
     } catch (e) {
-        console.error('[Codseez OMS Init] Auth redirect error:', e);
+        console.error('[CodFlow OMS Init] Auth redirect error:', e);
     }
 });
 
@@ -1439,7 +1773,7 @@ function initNavigation() {
         if (titleEl) titleEl.textContent = pageTitle || 'SmartZone';
         if (subEl) subEl.textContent = subtitle || 'Business Dashboard';
 
-        // Context-sensitive top buttons matching Codseez OMS
+        // Context-sensitive top buttons matching CodFlow OMS
         if (pageId === 'page-create-order') {
             if (btnCreateOrder) btnCreateOrder.style.display = 'none';
             if (btnAddProduct) btnAddProduct.style.display = 'none';
@@ -1496,9 +1830,18 @@ function initSidebar() {
 }
 
 // Sign Out Confirmation
-window.confirmSignOut = function() {
-    if (confirm('Are you sure you want to sign out from Codseez OMS?')) {
-        alert('Signed out successfully.');
+window.confirmSignOut = async function() {
+    const ok = await AppDialog.confirm({
+        title: 'Sign Out from CodFlow OMS?',
+        message: 'Are you sure you want to sign out and lock your session?',
+        type: 'danger',
+        icon: '🚪',
+        confirmText: 'Yes, Sign Out',
+        cancelText: 'Stay Logged In'
+    });
+    if (ok) {
+        Auth.logout();
+        Toast.info('Signed out successfully.');
     }
 };
 
@@ -1808,12 +2151,21 @@ function renderAllOrdersTable() {
     renderOrdersRows(orders, tbody);
 }
 
-window.deleteOrderById = function(idx) {
-    if (confirm('Delete this order?')) {
+window.deleteOrderById = async function(idx) {
+    const ok = await AppDialog.confirm({
+        title: 'Delete Order?',
+        message: 'Are you sure you want to permanently delete this order from your records? This action cannot be undone.',
+        type: 'danger',
+        icon: '🗑️',
+        confirmText: 'Delete Order',
+        cancelText: 'Keep Order'
+    });
+    if (ok) {
         OrdersStorage.delete(idx);
         renderAllOrdersTable();
         renderDashboard();
         renderDeliveryServicesList();
+        Toast.success('Order removed successfully.');
     }
 };
 
@@ -2051,10 +2403,21 @@ window.closeAddProductModal = function() {
     if (modal) modal.classList.remove('open');
 };
 
-window.deleteProduct = function(id) {
-    if (confirm(`Delete product ${id}?`)) {
+window.deleteProduct = async function(id) {
+    const p = typeof ProductsStorage !== 'undefined' ? ProductsStorage.getById(id) : null;
+    const name = p ? p.name : id;
+    const ok = await AppDialog.confirm({
+        title: 'Delete Product?',
+        message: `Are you sure you want to delete product "${name}" from your inventory catalog?`,
+        type: 'danger',
+        icon: '🗑️',
+        confirmText: 'Delete Product',
+        cancelText: 'Cancel'
+    });
+    if (ok) {
         if (typeof ProductsStorage !== 'undefined') ProductsStorage.delete(id);
         if (typeof renderProductsView === 'function') renderProductsView();
+        Toast.success(`Product "${name}" deleted from Inventory.`);
     }
 };
 
@@ -2366,7 +2729,16 @@ function setupCreateOrderForm() {
         // Fraud detection check
         const fraudCheck = CustomerFraudDetector.check(phone, address, city);
         if (!fraudCheck.isValid) {
-            const proceed = confirm(`⚠️ Fraud / Fake Order Warning:\n\n${fraudCheck.issues.join('\n')}\n\nDo you still want to proceed with dispatch?`);
+            const proceed = await AppDialog.confirm({
+                title: 'Fraud / Fake Order Warning',
+                message: 'Potential delivery risk detected for this customer. Please review the flagged items before booking:',
+                items: fraudCheck.issues,
+                type: 'warning',
+                icon: '⚠️',
+                confirmText: 'Proceed with Dispatch',
+                cancelText: 'Cancel / Review Order',
+                confirmClass: 'btn-confirm-warning'
+            });
             if (!proceed) return;
         }
 
@@ -2790,11 +3162,20 @@ window.closeDeliveryServiceModal = function() {
     if (modal) modal.classList.remove('open');
 };
 
-window.deleteDeliveryService = function(id) {
-    if (confirm('Delete this delivery service?')) {
+window.deleteDeliveryService = async function(id) {
+    const ok = await AppDialog.confirm({
+        title: 'Delete Delivery Service?',
+        message: 'Are you sure you want to remove this courier service configuration?',
+        type: 'danger',
+        icon: '🚚',
+        confirmText: 'Delete Service',
+        cancelText: 'Cancel'
+    });
+    if (ok) {
         if (typeof DeliveryServices !== 'undefined') DeliveryServices.delete(id);
         if (typeof renderDeliveryServicesList === 'function') renderDeliveryServicesList();
         if (typeof populateDeliveryServiceDropdown === 'function') populateDeliveryServiceDropdown();
+        Toast.success('Delivery service removed.');
     }
 };
 
@@ -3275,7 +3656,7 @@ function initAuthPortal() {
             }
 
             closeAuthPortal();
-            alert(`🎉 Welcome to Codseez OMS, ${name}!\n\nYour 10-Day Free Demo is active for "${store}".\nYou have 100% full access to Orders, Products, Couriers & SMS for 10 days.`);
+            alert(`🎉 Welcome to CodFlow OMS, ${name}!\n\nYour 10-Day Free Demo is active for "${store}".\nYou have 100% full access to Orders, Products, Couriers & SMS for 10 days.`);
             Auth.updateUserUI();
             navigateTo('page-dashboard', store, 'Business Dashboard');
         });
@@ -3899,10 +4280,21 @@ function setupAdminConsole() {
         alert(`✅ ${user.storeName || user.name} is now an Active Paid Merchant!`);
     };
 
-    window.adminDeleteUser = function(userId) {
-        if (confirm('Permanently delete this merchant account?')) {
+    window.adminDeleteUser = async function(userId) {
+        const u = UsersStorage.getById(userId);
+        const name = u ? (u.storeName || u.name) : 'this merchant';
+        const ok = await AppDialog.confirm({
+            title: 'Delete Merchant Store?',
+            message: `Permanently delete "${name}" and all associated store data? This action cannot be undone.`,
+            type: 'danger',
+            icon: '🗑️',
+            confirmText: 'Permanently Delete',
+            cancelText: 'Cancel'
+        });
+        if (ok) {
             UsersStorage.delete(userId);
             renderAdminView();
+            Toast.success('Merchant account deleted.');
         }
     };
 
@@ -3961,7 +4353,7 @@ function setupAdminConsole() {
             // Send Real Confirmation SMS to Customer
             if (user.phone) {
                 const expStr = newExpiresAt ? new Date(newExpiresAt).toLocaleDateString() : 'Lifetime Permanent';
-                const userSms = `Dear ${user.name},\nYour Codseez OMS ${planTitle} for "${user.storeName || user.name}" has been APPROVED!\nAccess Active Until: ${expStr}.\nThank you for choosing SmartZone!`;
+                const userSms = `Dear ${user.name},\nYour CodFlow OMS ${planTitle} for "${user.storeName || user.name}" has been APPROVED!\nAccess Active Until: ${expStr}.\nThank you for choosing SmartZone!`;
                 try {
                     await SmsGateway.send(user.phone, userSms, 'SMSLENZ', 'SMART ZONE');
                 } catch(e) {
@@ -3977,11 +4369,19 @@ function setupAdminConsole() {
         renderAdminView();
     };
 
-    window.adminRejectPayment = function(payId, userId) {
-        if (!confirm('Reject this payment deposit submission?')) return;
+    window.adminRejectPayment = async function(payId, userId) {
+        const ok = await AppDialog.confirm({
+            title: 'Reject Payment Deposit?',
+            message: 'Are you sure you want to mark this payment slip deposit as Rejected?',
+            type: 'danger',
+            icon: '❌',
+            confirmText: 'Reject Deposit',
+            cancelText: 'Keep Pending'
+        });
+        if (!ok) return;
         PaymentsStorage.updateStatus(payId, 'Rejected');
         renderAdminView();
-        alert('❌ Payment deposit has been marked as Rejected.');
+        Toast.warning('Payment deposit marked as Rejected.');
     };
 
     // Add Merchant Modal
@@ -4061,7 +4461,7 @@ window.executeDataExport = function() {
 
     const exportBundle = {
         exportedAt: new Date().toISOString(),
-        system: "SmartZone Codseez OMS",
+        system: "SmartZone CodFlow OMS",
         data: {}
     };
 
@@ -4081,7 +4481,7 @@ window.executeDataExport = function() {
     const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportBundle, null, 2));
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute("href", jsonStr);
-    dlAnchor.setAttribute("download", `SmartZone_Codseez_Export_${new Date().toISOString().slice(0,10)}.json`);
+    dlAnchor.setAttribute("download", `SmartZone_CodFlow_Export_${new Date().toISOString().slice(0,10)}.json`);
     if (document.body) document.body.appendChild(dlAnchor);
     dlAnchor.click();
     if (document.body) dlAnchor.remove();

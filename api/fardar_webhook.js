@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
         status: "success",
         code: 200,
         success: true,
-        message: "Fardar Express Webhook endpoint active & ready on Codseez OMS",
+        message: "Fardar Express Webhook endpoint active & ready on CodFlow OMS",
         waybill_id: waybill_id || "API5173879",
         current_status: status,
         last_update_time: time

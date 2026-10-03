@@ -1,7 +1,7 @@
 /**
- * SmartZone OMS - Codseez OMS Exact Match Design System
+ * SmartZone OMS - CodFlow OMS Design System
  * 100% Pure Vanilla CSS (No Tailwind, No External Frameworks)
- * Light dashboard layout with dark navy sidebar, matching Codseez OMS exactly
+ * Light dashboard layout with dark navy sidebar, matching CodFlow OMS theme
  */
 
 :root {
@@ -66,7 +66,7 @@ body {
 }
 
 /* ========================================================
-   SIDEBAR (CODSEEZ OMS NAVY THEME)
+   SIDEBAR (CODFLOW OMS NAVY THEME)
    ======================================================== */
 .sidebar {
     width: 250px;
@@ -2200,5 +2200,377 @@ input:checked + .slider:before {
     color: #1e293b;
     margin-top: 2px;
     letter-spacing: 0.2px;
+}
+
+/* ========================================================
+   MODERN TOAST & CUSTOM DIALOG NOTIFICATION SYSTEM
+   ======================================================== */
+#app-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 420px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    #app-toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        max-width: none;
+    }
+}
+
+.app-toast {
+    pointer-events: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 12px -6px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.app-toast.toast-hiding {
+    animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(40px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(40px) scale(0.92);
+    }
+}
+
+.app-toast-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.app-toast.toast-success .app-toast-icon-wrap {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.app-toast.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.app-toast.toast-error .app-toast-icon-wrap {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.app-toast.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.app-toast.toast-warning .app-toast-icon-wrap {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.app-toast.toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.app-toast.toast-info .app-toast-icon-wrap {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.app-toast.toast-info {
+    border-left: 4px solid #2563eb;
+}
+
+.app-toast-body {
+    flex: 1;
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.app-toast-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.app-toast-message {
+    font-size: 12.5px;
+    color: #475569;
+    line-height: 1.45;
+    word-break: break-word;
+    white-space: pre-line;
+}
+
+.app-toast-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    margin: -4px -4px 0 0;
+}
+
+.app-toast-close:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+.app-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    transform-origin: left;
+}
+
+.app-toast.toast-success .app-toast-progress { background: #10b981; }
+.app-toast.toast-error .app-toast-progress { background: #ef4444; }
+.app-toast.toast-warning .app-toast-progress { background: #f59e0b; }
+.app-toast.toast-info .app-toast-progress { background: #2563eb; }
+
+/* Custom Modal Dialog (AppDialog) */
+#app-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000000;
+    background: rgba(15, 23, 42, 0.68);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#app-dialog-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.app-dialog-card {
+    background: #ffffff;
+    border-radius: 20px;
+    max-width: 490px;
+    width: 100%;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 24px;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+#app-dialog-overlay.active .app-dialog-card {
+    transform: scale(1) translateY(0);
+}
+
+.app-dialog-icon-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 16px -4px rgba(0,0,0,0.08);
+}
+
+.app-dialog-card.dialog-warning .app-dialog-icon-badge {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #b45309;
+    border: 1.5px solid #fcd34d;
+}
+
+.app-dialog-card.dialog-danger .app-dialog-icon-badge {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #dc2626;
+    border: 1.5px solid #fca5a5;
+}
+
+.app-dialog-card.dialog-info .app-dialog-icon-badge {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1d4ed8;
+    border: 1.5px solid #93c5fd;
+}
+
+.app-dialog-card.dialog-success .app-dialog-icon-badge {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #15803d;
+    border: 1.5px solid #86efac;
+}
+
+.app-dialog-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+}
+
+.app-dialog-message {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.55;
+    margin-bottom: 14px;
+    word-break: break-word;
+    white-space: pre-line;
+}
+
+.app-dialog-items-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.app-dialog-card.dialog-warning .app-dialog-items-box {
+    background: #fffbeb;
+    border-color: #fef08a;
+}
+
+.app-dialog-item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #78350f;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+.app-dialog-item-bullet {
+    color: #d97706;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.app-dialog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.btn-dialog-cancel {
+    padding: 10px 18px;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-dialog-cancel:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.btn-dialog-confirm {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-dialog-confirm.btn-confirm-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.btn-dialog-confirm.btn-confirm-danger:hover {
+    background: #b91c1c;
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-dialog-confirm.btn-confirm-warning {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.btn-dialog-confirm.btn-confirm-warning:hover {
+    background: #c2410c;
+    box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-dialog-confirm.btn-confirm-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.btn-dialog-confirm.btn-confirm-primary:hover {
+    background: #1e40af;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    transform: translateY(-1px);
 }
 

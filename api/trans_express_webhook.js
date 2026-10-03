@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
         status: 200,
         success: true,
-        message: "Trans Express Webhook endpoint active & ready on Codseez OMS",
+        message: "Trans Express Webhook endpoint active & ready on CodFlow OMS",
         tracking_no,
         status
     });

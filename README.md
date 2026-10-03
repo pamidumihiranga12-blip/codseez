@@ -1,6 +1,6 @@
 # 📦 SmartZone Courier OMS (100% Pure HTML/CSS/JS)
 
-> **Codseez OMS වැනි සම්පූර්ණ E-Commerce Order Management System එකක් කිසිදු PHP හෝ Server එකක් අවශ්‍ය නොවී (No Server / No PHP), ඕනෑම Browser එකකින් කෙලින්ම විවෘත කළ හැකි Pure HTML5 / JavaScript තාක්ෂණයෙන් සකසන ලද පද්ධතිය.**
+> **CodFlow OMS — සම්පූර්ණ E-Commerce Order Management System එකක් කිසිදු PHP හෝ Server එකක් අවශ්‍ය නොවී (No Server / No PHP), ඕනෑම Browser එකකින් කෙලින්ම විවෘත කළ හැකි Pure HTML5 / JavaScript තාක්ෂණයෙන් සකසන ලද පද්ධතිය.**
 
 ---
 

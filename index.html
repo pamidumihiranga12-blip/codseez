@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartZone - Codseez OMS</title>
+    <title>SmartZone - CodFlow OMS</title>
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,20 +11,20 @@
     <!-- JsBarcode & QRCode.js (Client-side libraries for Thermal 4x6" label printing) -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <!-- Custom CSS matching Codseez OMS -->
+    <!-- Custom CSS matching CodFlow OMS -->
     <link rel="stylesheet" href="css/oms.css">
 </head>
 <body>
 
 <!-- ========================================================
-     1. SIDEBAR NAVIGATION (CODSEEZ OMS NAVY THEME)
+     1. SIDEBAR NAVIGATION (CODFLOW OMS NAVY THEME)
      ======================================================== -->
 <aside class="sidebar" id="app-sidebar">
     <div>
         <div class="sidebar-header">
             <div class="sidebar-brand-group">
                 <div class="sidebar-logo-icon">
-                    <!-- Codseez OMS Hexagonal Cube SVG Logo -->
+                    <!-- CodFlow OMS Hexagonal Cube SVG Logo -->
                     <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M14 2L25 8V20L14 26L3 20V8L14 2Z" fill="#2563eb"/>
                         <path d="M14 2L25 8L14 14L3 8L14 2Z" fill="#38bdf8"/>
@@ -32,7 +32,7 @@
                         <path d="M25 8L14 14V26L25 20V8Z" fill="#2563eb"/>
                     </svg>
                 </div>
-                <div class="sidebar-brand-name">Codseez OMS</div>
+                <div class="sidebar-brand-name">CodFlow OMS</div>
             </div>
             <button class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -288,7 +288,7 @@
                     <span class="period-chevron">⌵</span>
                 </div>
 
-                <!-- State Switcher: allows switching between Codseez pristine 0-state and live sample orders -->
+                <!-- State Switcher: allows switching between CodFlow pristine 0-state and live sample orders -->
                 <div class="demo-data-toggle-wrap">
                     <button type="button" class="btn-pill-subtle" id="btn-toggle-demo-view" onclick="toggleDemoDataMode()">
                         ⚡ Switch to Clean 0-View
@@ -556,7 +556,7 @@
                                 <button type="button" class="btn-confirm-unpaid" onclick="document.getElementById('create-order-form').dispatchEvent(new Event('submit'))">
                                     Confirm as Unpaid Order
                                 </button>
-                                <button type="button" class="btn-save-draft" onclick="alert('Order saved to Drafts.')">
+                                <button type="button" class="btn-save-draft" onclick="Toast.info('Order saved to Drafts.')">
                                     Save as Draft
                                 </button>
                             </div>
@@ -1511,7 +1511,7 @@
     </div>
 </div>
 <!-- ========================================================
-     MODAL 4: ADD / EDIT INVENTORY PRODUCT (CODSEEZ PRODUCTS)
+     MODAL 4: ADD / EDIT INVENTORY PRODUCT (CODFLOW PRODUCTS)
      ======================================================== -->
 <div id="add-product-modal" class="modal-overlay">
     <div class="modal-box" style="max-width:520px;">
@@ -1870,7 +1870,7 @@
     <div class="auth-portal-card">
         <div class="auth-brand-head">
             <div class="auth-logo-badge">⚡</div>
-            <h2 class="auth-title">Codseez OMS</h2>
+            <h2 class="auth-title">CodFlow OMS</h2>
             <p class="auth-subtitle">Sri Lankan E-Commerce Operations & Order Management</p>
         </div>
 
@@ -1946,6 +1946,10 @@
         </div>
     </div>
 </div>
+
+<!-- Modern Notification Toast Container & Dialog Overlay -->
+<div id="app-toast-container"></div>
+<div id="app-dialog-overlay"></div>
 
 <!-- Load Custom JavaScript Engine -->
 <script src="js/oms.js"></script>
