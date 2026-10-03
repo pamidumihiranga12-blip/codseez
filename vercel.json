@@ -18,6 +18,14 @@
       "destination": "/api/trans_express_webhook.js"
     },
     {
+      "source": "/api/db",
+      "destination": "/api/db.js"
+    },
+    {
+      "source": "/api/db.php",
+      "destination": "/api/db.js"
+    },
+    {
       "source": "/admin",
       "destination": "/admin/index.html"
     },

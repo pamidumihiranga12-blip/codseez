@@ -1238,6 +1238,30 @@
             }
         }
 
+        // Asynchronously sync latest products from MySQL Cloud (CodFlow-353130305fd5)
+        function syncProductsFromCloud() {
+            const mId = activeStoreId || 'usr_admin';
+            fetch(`api/db.php?action=get_all&merchant_id=${encodeURIComponent(mId)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+                        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(data.products));
+                        if (typeof renderProducts === 'function') renderProducts();
+                    }
+                })
+                .catch(() => {
+                    fetch(`api/db?action=get_all&merchant_id=${encodeURIComponent(mId)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+                                localStorage.setItem(PRODUCTS_KEY, JSON.stringify(data.products));
+                                if (typeof renderProducts === 'function') renderProducts();
+                            }
+                        }).catch(() => {});
+                });
+        }
+        syncProductsFromCloud();
+
         function getStoredOrders() {
             const raw = localStorage.getItem(ORDERS_KEY);
             if (!raw) {
@@ -1570,6 +1594,29 @@
             const orders = getStoredOrders();
             orders.unshift(newOrder);
             localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+            // Direct Save to MySQL Cloud Database (CodFlow-353130305fd5)
+            try {
+                fetch('api/db.php?action=save_order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        merchant_id: storeMerchant?.id || 'usr_admin',
+                        order: newOrder
+                    })
+                }).then(res => res.json()).then(resData => {
+                    console.log('[Storefront MySQL Cloud] Order saved to MySQL successfully:', resData);
+                }).catch(() => {
+                    fetch('api/db?action=save_order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            merchant_id: storeMerchant?.id || 'usr_admin',
+                            order: newOrder
+                        })
+                    }).catch(() => {});
+                });
+            } catch(e) {}
 
             // Deduct stock from ProductsStorage
             const products = getStoredProducts();

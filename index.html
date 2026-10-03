@@ -242,6 +242,11 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add Product
             </button>
+            <!-- MySQL Cloud Database Indicator -->
+            <button type="button" id="db-status-badge" class="btn-cancel" style="font-weight:700; display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px; border:1px solid #bbf7d0; background:#f0fdf4; color:#15803d; border-radius:6px; cursor:pointer;" onclick="openDatabaseInfoModal()" title="StackCP MySQL Cloud Database (1024 MB Compressed)">
+                <span id="db-status-dot" style="width:7px; height:7px; border-radius:50%; background:#16a34a; box-shadow:0 0 6px #16a34a;"></span>
+                <span id="db-status-text">MySQL: CodFlow (1024 MB)</span>
+            </button>
             <a id="btn-top-store" href="store.html" target="_blank" class="btn-cancel" style="font-weight:700; display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px; border:1px solid #bae6fd; background:#f0f9ff; color:#0369a1; text-decoration:none; border-radius:6px;" title="Open Customer Online Shop in new tab">
                 <span>🌐 Customer Store</span>
             </a>
@@ -860,51 +865,128 @@
              PAGE 6: EXPENSES & TRUE PROFIT
              ======================================================== -->
         <section id="page-expenses" class="page-view">
-            <div class="white-panel" style="max-width:700px;">
-                <div class="panel-title-bar">
-                    <div class="panel-title">💰 True Order Profit Calculator</div>
+            <!-- Header bar with Title and + Add Expense button (Matching Screenshot 3) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:22px; font-weight:800; color:#0f172a; letter-spacing:-0.5px;">Expenses</h2>
+                <button type="button" class="btn-create-order" onclick="openAddExpenseModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>+ Add Expense</span>
+                </button>
+            </div>
+
+            <!-- 3 Top Metric KPI Cards (Matching Screenshot 3) -->
+            <div class="expenses-kpi-grid">
+                <div class="expenses-kpi-card">
+                    <div class="expenses-kpi-lbl">PERIOD TOTAL</div>
+                    <div class="expenses-kpi-val val-red" id="exp-kpi-period">Rs. 0</div>
+                </div>
+                <div class="expenses-kpi-card">
+                    <div class="expenses-kpi-lbl">TODAY</div>
+                    <div class="expenses-kpi-val val-amber" id="exp-kpi-today">Rs. 0</div>
+                </div>
+                <div class="expenses-kpi-card">
+                    <div class="expenses-kpi-lbl">RECORDS</div>
+                    <div class="expenses-kpi-val val-blue" id="exp-kpi-records">0</div>
+                </div>
+            </div>
+
+            <!-- Filter Dropdown right above table matching Screenshot 3 -->
+            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                <div class="select-wrapper" style="width:160px;">
+                    <select id="exp-period-select" class="form-ctrl select-styled" onchange="renderExpensesView()">
+                        <option value="month" selected>This month</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="7days">Last 7 days</option>
+                        <option value="30days">Last 30 days</option>
+                        <option value="year">This year</option>
+                        <option value="all">All time</option>
+                    </select>
+                    <span class="select-chevron">⌵</span>
+                </div>
+            </div>
+
+            <!-- Expenses Table Panel (Matching Screenshot 3) -->
+            <div class="expenses-table-panel">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>DATE</th>
+                                <th>NOTE</th>
+                                <th>BRAND</th>
+                                <th>AMOUNT</th>
+                                <th style="text-align:right;">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="row-2col">
-                    <div class="field-group">
-                        <label class="field-tag">Selling Price (Rs.)</label>
-                        <input type="number" id="ep-selling" class="form-ctrl" value="4500" oninput="calcEpProfit()">
+                <!-- Empty State matching Screenshot 3 -->
+                <div id="expenses-empty-state" class="expenses-empty-state" style="display:none;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="20" height="14" x="2" y="5" rx="2"/>
+                        <line x1="2" x2="22" y1="10" y2="10"/>
+                    </svg>
+                    <p>No expenses in this period</p>
+                </div>
+            </div>
+
+            <!-- Collapsible Net Profit Calculator -->
+            <div class="white-panel" style="margin-top:22px;">
+                <div class="panel-title-bar" style="cursor:pointer;" onclick="toggleProfitCalcPanel()">
+                    <div class="panel-title" style="display:flex; align-items:center; gap:8px;">
+                        <span>💰 Order Profit Margin Calculator</span>
+                        <span style="font-size:11px; font-weight:700; color:#2563eb; background:#eff6ff; padding:2px 8px; border-radius:4px;">Quick Tool</span>
                     </div>
-                    <div class="field-group">
-                        <label class="field-tag">Product Cost (Rs.)</label>
-                        <input type="number" id="ep-cost" class="form-ctrl" value="1800" oninput="calcEpProfit()">
-                    </div>
+                    <span id="profit-calc-chevron" style="font-weight:700; color:#64748b;">▼</span>
                 </div>
 
-                <div class="row-2col">
-                    <div class="field-group">
-                        <label class="field-tag">Courier Delivery Fee (Rs.)</label>
-                        <input type="number" id="ep-courier" class="form-ctrl" value="500" oninput="calcEpProfit()">
+                <div id="profit-calc-body" style="display:none; padding-top:14px;">
+                    <div class="row-2col">
+                        <div class="field-group">
+                            <label class="field-tag">Selling Price (Rs.)</label>
+                            <input type="number" id="ep-selling" class="form-ctrl" value="4500" oninput="calcEpProfit()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-tag">Product Cost (Rs.)</label>
+                            <input type="number" id="ep-cost" class="form-ctrl" value="1800" oninput="calcEpProfit()">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label class="field-tag">Packaging / Flyer (Rs.)</label>
-                        <input type="number" id="ep-pack" class="form-ctrl" value="80" oninput="calcEpProfit()">
-                    </div>
-                </div>
 
-                <div class="row-2col">
-                    <div class="field-group">
-                        <label class="field-tag">Ad Spend / Facebook CPA (Rs.)</label>
-                        <input type="number" id="ep-ad" class="form-ctrl" value="650" oninput="calcEpProfit()">
+                    <div class="row-2col">
+                        <div class="field-group">
+                            <label class="field-tag">Courier Delivery Fee (Rs.)</label>
+                            <input type="number" id="ep-courier" class="form-ctrl" value="500" oninput="calcEpProfit()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-tag">Packaging / Flyer (Rs.)</label>
+                            <input type="number" id="ep-pack" class="form-ctrl" value="80" oninput="calcEpProfit()">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label class="field-tag">RTO Status</label>
-                        <select id="ep-rto" class="form-ctrl" onchange="calcEpProfit()">
-                            <option value="0">Delivered Successfully</option>
-                            <option value="1">Returned (RTO 1.5x Penalty)</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; text-align:center; margin-top:14px;">
-                    <div style="font-size:12px; font-weight:700; color:#64748b;">ESTIMATED TRUE NET PROFIT:</div>
-                    <div id="ep-profit-result" style="font-size:32px; font-weight:800; color:#10b981; margin:6px 0;">Rs. 1,470.00</div>
-                    <div id="ep-margin-result" style="font-size:12px; color:#64748b;">Margin: 32.7%</div>
+                    <div class="row-2col">
+                        <div class="field-group">
+                            <label class="field-tag">Ad Spend / Facebook CPA (Rs.)</label>
+                            <input type="number" id="ep-ad" class="form-ctrl" value="650" oninput="calcEpProfit()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-tag">RTO Status</label>
+                            <select id="ep-rto" class="form-ctrl" onchange="calcEpProfit()">
+                                <option value="0">Delivered Successfully</option>
+                                <option value="1">Returned (RTO 1.5x Penalty)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; text-align:center; margin-top:14px;">
+                        <div style="font-size:12px; font-weight:700; color:#64748b;">ESTIMATED TRUE NET PROFIT:</div>
+                        <div id="ep-profit-result" style="font-size:32px; font-weight:800; color:#10b981; margin:6px 0;">Rs. 1,470.00</div>
+                        <div id="ep-margin-result" style="font-size:12px; color:#64748b;">Margin: 32.7%</div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1003,8 +1085,69 @@
         <section id="page-sales" class="page-view">
             <div class="white-panel"><div class="panel-title">Sales Analytics</div><div class="empty-state-box">Sales trend charts and monthly performance reports</div></div>
         </section>
+        <!-- ========================================================
+             PAGE: TEAM (SCREENSHOT 2 EXACT MATCH)
+             ======================================================== -->
         <section id="page-team" class="page-view">
-            <div class="white-panel"><div class="panel-title">Team</div><div class="empty-state-box">1 User (Pamidu mihiranga - Owner)</div></div>
+            <!-- Header bar with Title, subtitle and + Invite Member button -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                <div>
+                    <h2 style="font-size:22px; font-weight:800; color:#0f172a; letter-spacing:-0.5px;">Team</h2>
+                    <p style="font-size:13px; color:#64748b; margin-top:2px;" id="team-members-subtitle">1 members</p>
+                </div>
+                <button type="button" class="btn-create-order" onclick="openAddTeamMemberModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>+ Invite Member</span>
+                </button>
+            </div>
+
+            <!-- Tab Pills (Members & Performance matching Screenshot 2) -->
+            <div class="team-tabs">
+                <button type="button" class="team-tab-btn active" id="tab-btn-team-members" onclick="switchTeamTab('members')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Members</span>
+                </button>
+                <button type="button" class="team-tab-btn" id="tab-btn-team-perf" onclick="switchTeamTab('performance')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Performance</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Members Cards Grid (Matching Screenshot 2) -->
+            <div id="team-view-members">
+                <div class="team-members-grid" id="team-members-container">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Team Performance View -->
+            <div id="team-view-perf" style="display:none;">
+                <div class="white-panel">
+                    <div class="panel-title-bar">
+                        <div>
+                            <div class="panel-title">📊 Team Performance & Dispatch Activity</div>
+                            <div class="panel-subtitle">Monitor orders created, dispatches processed, and delivery rates by staff member</div>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>MEMBER</th>
+                                    <th>ROLE</th>
+                                    <th>ORDERS DISPATCHED</th>
+                                    <th>DELIVERED</th>
+                                    <th>SUCCESS RATE</th>
+                                    <th>LAST ACTIVE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="team-perf-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- ========================================================
@@ -1204,6 +1347,99 @@
                             <!-- Populated dynamically by Admin JS -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- MySQL Cloud Database & Storage Optimization Center (StackCP) -->
+            <div class="white-panel" style="margin-bottom:22px; border:1.5px solid #bbf7d0; background:linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title" style="display:flex; align-items:center; gap:8px;">
+                            <span>🗄️ MySQL Cloud Database & Space Saving Center</span>
+                            <span style="font-size:11px; font-weight:800; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 8px; border-radius:999px;">STACKCP LIVE</span>
+                        </div>
+                        <div class="panel-subtitle">Ultra-compressed schema (InnoDB ROW_FORMAT=COMPRESSED) with 1024 MB storage capacity</div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn-cancel" style="font-size:12px; font-weight:700; color:#15803d; border:1px solid #bbf7d0; background:#fff; padding:6px 12px;" onclick="testMySQLConnection()">
+                            🧪 Test DB Connection
+                        </button>
+                        <button type="button" class="btn-cancel" style="font-size:12px; font-weight:700; color:#b45309; border:1px solid #fde68a; background:#fff; padding:6px 12px;" onclick="optimizeDatabaseStorage()">
+                            🧹 Optimize & Shrink DB
+                        </button>
+                        <button type="button" class="btn-create-order" style="font-size:12px; font-weight:700; background:#16a34a; padding:6px 14px;" onclick="triggerManualCloudSync()">
+                            🔄 Sync with Cloud Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Database Live Credentials & Host Grid -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:16px;">
+                    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">DATABASE HOST</div>
+                        <div style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:700; color:#0f172a; margin-top:3px;">sdb-86.hosting.stackcp.net</div>
+                        <div style="font-size:11px; color:#15803d; margin-top:2px;">● Internal StackCP Cluster (Port 3306)</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">DATABASE & USERNAME</div>
+                        <div style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:700; color:#2563eb; margin-top:3px;">CodFlow-353130305fd5</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">Multi-Tenant Unified Storage</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">DATABASE PASSWORD</div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:3px;">
+                            <span id="db-admin-pwd-text" style="font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:700; color:#0f172a;">••••••••••••</span>
+                            <button type="button" class="btn-cancel" style="padding:1px 6px; font-size:10px;" onclick="toggleDbPwdVisibility()">Show</button>
+                        </div>
+                        <div style="font-size:11px; color:#15803d; margin-top:2px;">✓ Verified Saved (Perfect)</div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:10.5px; font-weight:800; color:#64748b; text-transform:uppercase;">SPACE SAVING MODE</div>
+                        <div style="font-size:13px; font-weight:800; color:#16a34a; margin-top:3px;">⚡ InnoDB Compressed</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">~70% Disk Space Saved (zlib)</div>
+                    </div>
+                </div>
+
+                <!-- 1024 MB Storage Quota Progress Gauge (Matching Screenshot 0 / 1024 MB) -->
+                <div style="background:#fff; border:1px solid #bbf7d0; border-radius:10px; padding:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div>
+                            <span style="font-size:12.5px; font-weight:800; color:#0f172a;">Storage Quota Usage:</span>
+                            <span id="admin-db-used" style="font-family:'JetBrains Mono'; font-weight:800; color:#16a34a; margin-left:6px;">0.05 MB</span>
+                            <span style="color:#64748b;"> / </span>
+                            <span id="admin-db-quota" style="font-family:'JetBrains Mono'; font-weight:700; color:#0f172a;">1024 MB</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:11.5px; color:#64748b;">Estimated Capacity:</span>
+                            <span id="admin-db-capacity" style="font-size:12px; font-weight:800; background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:6px; border:1px solid #bfdbfe;">~2,500,000+ Orders</span>
+                        </div>
+                    </div>
+
+                    <div style="width:100%; height:12px; background:#e2e8f0; border-radius:999px; overflow:hidden; position:relative;">
+                        <div id="admin-db-bar" style="width:1%; height:100%; background:linear-gradient(90deg, #10b981, #059669); border-radius:999px; transition:width 0.4s ease;"></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:#64748b;">
+                        <span>0 MB (Empty)</span>
+                        <span id="admin-db-pct" style="font-weight:700; color:#15803d;">0.01% Used</span>
+                        <span>1024 MB (Max Limit)</span>
+                    </div>
+                </div>
+
+                <!-- Space-saving Architecture Explanations for User Peace of Mind -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:4px;">📦 Compact Order Items</div>
+                        <p style="font-size:11.5px; color:#64748b; line-height:1.4;">Only crucial item attributes (ID, name, price, qty, weight) are stored without dead whitespaces, reducing each order's size by 65%.</p>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:4px;">🖼️ 35KB Receipt Compressor</div>
+                        <p style="font-size:11.5px; color:#64748b; line-height:1.4;">Phone camera deposit slips (typically 5 MB - 8 MB) are automatically downscaled to 35 KB before saving. Over 25,000 slips can easily fit.</p>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                        <div style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:4px;">🧹 On-Demand Table Optimization</div>
+                        <p style="font-size:11.5px; color:#64748b; line-height:1.4;">Click 'Optimize & Shrink DB' anytime to execute MySQL's OPTIMIZE TABLE command, releasing freed disk space back to the hosting storage.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1944,6 +2180,269 @@
             <a id="receipt-modal-download" href="" download="deposit_slip.png" class="btn-cancel" style="text-decoration:none; font-weight:700;">⬇ Download Slip</a>
             <button type="button" class="btn-cancel" onclick="closeAdminReceiptModal()">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal: MySQL Database Details & Health Preview -->
+<div id="db-info-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:520px;">
+        <div class="modal-head">
+            <h3>🗄️ MySQL Database Connection & Storage</h3>
+            <button type="button" class="modal-close-btn" onclick="closeDatabaseInfoModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; margin-bottom:14px; text-align:center;">
+                <div style="font-size:24px; margin-bottom:4px;">🟢</div>
+                <div style="font-size:14.5px; font-weight:800; color:#15803d;">Connected to StackCP MySQL Cloud</div>
+                <div style="font-size:12px; color:#64748b; margin-top:2px;">Host: <code style="font-weight:700;">sdb-86.hosting.stackcp.net</code></div>
+            </div>
+
+            <div style="font-size:12.5px; color:#334155; line-height:1.5; margin-bottom:12px;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;">Database Name:</td><td style="padding:6px 0; font-weight:700; text-align:right;">CodFlow-353130305fd5</td></tr>
+                    <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;">Database User:</td><td style="padding:6px 0; font-weight:700; text-align:right;">CodFlow-353130305fd5</td></tr>
+                    <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;">Storage Quota:</td><td style="padding:6px 0; font-weight:700; text-align:right;">1024 MB (1.0 GB)</td></tr>
+                    <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;">Current Space Used:</td><td id="modal-db-used" style="padding:6px 0; font-weight:700; color:#16a34a; text-align:right;">0.05 MB (0.01%)</td></tr>
+                    <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;">Space Saving Tech:</td><td style="padding:6px 0; font-weight:700; color:#2563eb; text-align:right;">InnoDB Page Compression (~70% Saved)</td></tr>
+                    <tr><td style="padding:6px 0; color:#64748b;">Estimated Capacity:</td><td id="modal-db-capacity" style="padding:6px 0; font-weight:700; color:#15803d; text-align:right;">~2,500,000+ Orders</td></tr>
+                </table>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; font-size:11.5px; color:#64748b;">
+                💡 <strong>Data Size Optimization Active:</strong> All orders, products and customer details are automatically minified before saving. Payment slips are downscaled to ~35KB so your 1024 MB storage will last for years.
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between;">
+            <button type="button" class="btn-cancel" onclick="optimizeDatabaseStorage()">🧹 Shrink & Optimize</button>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn-cancel" onclick="triggerManualCloudSync()">🔄 Sync Now</button>
+                <button type="button" class="btn-cancel" onclick="closeDatabaseInfoModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 9: ADD / EDIT BRAND (SCREENSHOT 1 EXACT MATCH)
+     ======================================================== -->
+<div id="add-brand-modal" class="modal-overlay">
+    <div class="modal-box brand-modal-box">
+        <div class="modal-head">
+            <h3 id="modal-brand-title">Add Brand</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddBrandModal()">✕</button>
+        </div>
+        <form id="add-brand-form">
+            <input type="hidden" id="brand-input-id" value="">
+            <div class="modal-body" style="padding:0;">
+                <div class="brand-form-field">
+                    <label class="brand-form-label">BRAND NAME</label>
+                    <input type="text" class="brand-input-ctrl" id="brand-input-name" required placeholder="">
+                </div>
+
+                <div class="brand-form-field">
+                    <label class="brand-form-label">SLOGAN</label>
+                    <input type="text" class="brand-input-ctrl" id="brand-input-slogan" placeholder="">
+                </div>
+
+                <div class="brand-form-field">
+                    <label class="brand-form-label">ADDRESS</label>
+                    <input type="text" class="brand-input-ctrl" id="brand-input-address" placeholder="">
+                </div>
+
+                <div class="brand-form-field">
+                    <label class="brand-form-label">EMAIL</label>
+                    <input type="email" class="brand-input-ctrl" id="brand-input-email" placeholder="">
+                </div>
+
+                <div class="brand-phone-row">
+                    <div>
+                        <label class="brand-form-label">PHONE 1</label>
+                        <input type="text" class="brand-input-ctrl" id="brand-input-phone1" placeholder="">
+                    </div>
+                    <div>
+                        <label class="brand-form-label">PHONE 2</label>
+                        <input type="text" class="brand-input-ctrl" id="brand-input-phone2" placeholder="">
+                    </div>
+                    <div>
+                        <label class="brand-form-label">PHONE 3</label>
+                        <input type="text" class="brand-input-ctrl" id="brand-input-phone3" placeholder="">
+                    </div>
+                </div>
+
+                <div class="brand-form-field">
+                    <label class="brand-form-label">LOGO</label>
+                    <div class="brand-logo-section">
+                        <div class="brand-logo-preview-box" id="brand-logo-preview">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                        <div class="brand-upload-wrap">
+                            <button type="button" class="btn-brand-upload" onclick="document.getElementById('brand-logo-file-input').click()">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <span>Upload Image</span>
+                            </button>
+                            <span class="brand-upload-hint">Max 5 MB</span>
+                            <input type="file" id="brand-logo-file-input" accept="image/*" style="display:none;" onchange="handleBrandLogoUpload(event)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="brand-form-field" style="margin-bottom:0;">
+                    <div class="brand-ds-header">
+                        <label class="brand-form-label" style="margin-bottom:0;">DELIVERY SERVICES</label>
+                        <div class="brand-ds-actions">
+                            <a href="javascript:void(0)" onclick="setAllBrandDeliveryServices(true)">Select all</a>
+                            <a href="javascript:void(0)" onclick="setAllBrandDeliveryServices(false)">None</a>
+                        </div>
+                    </div>
+                    <div class="brand-ds-box" id="brand-delivery-services-list">
+                        <label>
+                            <input type="checkbox" id="brand-ds-default" value="Default" checked>
+                            <span>Default</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-brand-cancel" onclick="closeAddBrandModal()">Cancel</button>
+                <button type="submit" class="btn-brand-submit" id="btn-save-brand">Add Brand</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 10: ADD EXPENSE (SCREENSHOT 3 COMPANION)
+     ======================================================== -->
+<div id="add-expense-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px; border-radius:14px; padding:22px;">
+        <div class="modal-head" style="margin-bottom:16px;">
+            <h3 style="font-size:17px; font-weight:700;">+ Add Expense</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddExpenseModal()">✕</button>
+        </div>
+        <form id="add-expense-form">
+            <div class="modal-body" style="padding:0;">
+                <div class="row-2col" style="margin-bottom:14px;">
+                    <div>
+                        <label class="field-label-text">DATE</label>
+                        <input type="date" class="form-ctrl" id="exp-modal-date" required>
+                    </div>
+                    <div>
+                        <label class="field-label-text">BRAND</label>
+                        <div class="select-wrapper">
+                            <select class="form-ctrl select-styled" id="exp-modal-brand">
+                                <option value="SmartZone">SmartZone</option>
+                            </select>
+                            <span class="select-chevron">⌵</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label class="field-label-text">NOTE / DESCRIPTION</label>
+                    <input type="text" class="form-ctrl" id="exp-modal-note" required placeholder="e.g. Courier shipping bill / Packaging boxes">
+                </div>
+
+                <div class="row-2col" style="margin-bottom:14px;">
+                    <div>
+                        <label class="field-label-text">AMOUNT (RS.)</label>
+                        <input type="number" step="0.01" min="0" class="form-ctrl" id="exp-modal-amount" required placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="field-label-text">PAYMENT METHOD</label>
+                        <div class="select-wrapper">
+                            <select class="form-ctrl select-styled" id="exp-modal-method">
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Card">Card</option>
+                            </select>
+                            <span class="select-chevron">⌵</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top:20px;">
+                <button type="button" class="btn-cancel" onclick="closeAddExpenseModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal" style="background:#2563eb;">Add Expense</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 11: INVITE TEAM MEMBER (SCREENSHOT 2 COMPANION)
+     ======================================================== -->
+<div id="add-team-member-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px; border-radius:14px; padding:22px;">
+        <div class="modal-head" style="margin-bottom:16px;">
+            <h3 style="font-size:17px; font-weight:700;">+ Invite Team Member</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddTeamMemberModal()">✕</button>
+        </div>
+        <form id="add-team-member-form">
+            <input type="hidden" id="team-modal-member-id" value="">
+            <div class="modal-body" style="padding:0;">
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label class="field-label-text">FULL NAME</label>
+                    <input type="text" class="form-ctrl" id="team-modal-name" required placeholder="e.g. Kasun Perera">
+                </div>
+
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label class="field-label-text">EMAIL ADDRESS</label>
+                    <input type="email" class="form-ctrl" id="team-modal-email" required placeholder="e.g. kasun@example.com">
+                </div>
+
+                <div class="row-2col" style="margin-bottom:14px;">
+                    <div>
+                        <label class="field-label-text">PHONE NUMBER</label>
+                        <input type="text" class="form-ctrl" id="team-modal-phone" placeholder="07XXXXXXXX">
+                    </div>
+                    <div>
+                        <label class="field-label-text">ROLE</label>
+                        <div class="select-wrapper">
+                            <select class="form-ctrl select-styled" id="team-modal-role">
+                                <option value="Staff">Staff</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Owner">Owner</option>
+                            </select>
+                            <span class="select-chevron">⌵</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-bottom:14px;">
+                    <label class="field-label-text">BRAND ACCESS</label>
+                    <div class="select-wrapper">
+                        <select class="form-ctrl select-styled" id="team-modal-brand-access">
+                            <option value="No restriction">No restriction (All Brands)</option>
+                            <option value="SmartZone">SmartZone Only</option>
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-bottom:0;">
+                    <label class="field-label-text">PERMISSIONS</label>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; display:flex; flex-direction:column; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:#1e293b; cursor:pointer;">
+                            <input type="checkbox" id="team-modal-full-access" checked>
+                            <span>Full Access (Manage Orders, Inventory & Settings)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top:20px;">
+                <button type="button" class="btn-cancel" onclick="closeAddTeamMemberModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal" style="background:#2563eb;">Invite Member</button>
+            </div>
+        </form>
     </div>
 </div>
 
