@@ -452,6 +452,18 @@ function formatSmsLenzContact(phone) {
     return '+' + digits;
 }
 
+// Format Phone Number for Sri Lankan courier APIs (10 digits starting with 0, e.g. 07XXXXXXXX)
+function formatFardarPhone(phone) {
+    if (!phone) return '0770000000';
+    let digits = ('' + phone).replace(/[^0-9]/g, '');
+    if (digits.startsWith('94') && digits.length >= 11) {
+        digits = '0' + digits.substring(2);
+    } else if (digits.length === 9) {
+        digits = '0' + digits;
+    }
+    return digits;
+}
+
 window.copyModalWebhookUrl = function() {
     const input = document.getElementById('modal-ds-webhook');
     if (!input || !input.value) return;
@@ -653,6 +665,128 @@ const SmsSettings = {
         return msg;
     }
 };
+
+// ========================================================
+// 3. COURIER LIVE API DISPATCH ENGINE (FARDAR & TRANS EXPRESS)
+// ========================================================
+const CourierApi = {
+    // Book parcel on Fardar Express Domestic API (https://www.fdedomestic.com/api/parcel/new_api_v1.php)
+    async createFardarParcel(orderData, serviceConfig) {
+        const clientId = serviceConfig?.clientId || '5980';
+        const apiKey = serviceConfig?.apiKey || '2c25c0244f8d688eb9ff';
+
+        const phone1 = formatFardarPhone(orderData.phone);
+        const phone2 = formatFardarPhone(orderData.phone2 || orderData.phone);
+        const description = (orderData.items && orderData.items.length > 0)
+            ? orderData.items.map(i => `${i.qty}x ${i.name}`).join(', ')
+            : 'SmartZone E-Commerce Order';
+
+        const formData = new URLSearchParams();
+        formData.append('client_id', String(clientId).trim());
+        formData.append('api_key', String(apiKey).trim());
+        formData.append('order_id', orderData.id || ('SZ-' + Date.now()));
+        formData.append('parcel_weight', String(orderData.weight || 0.5));
+        formData.append('parcel_description', description.slice(0, 190));
+        formData.append('recipient_name', orderData.customer || 'Customer');
+        formData.append('recipient_contact_1', phone1);
+        formData.append('recipient_contact_2', phone2);
+        formData.append('recipient_address', orderData.address || 'Sri Lanka');
+        formData.append('recipient_city', orderData.city || 'Padaviya');
+        formData.append('amount', String(orderData.total || 0));
+        formData.append('exchange', '0');
+
+        console.log('[CourierApi] Live Booking on Fardar Express Domestic:', Object.fromEntries(formData.entries()));
+
+        try {
+            const response = await fetch('https://www.fdedomestic.com/api/parcel/new_api_v1.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json().catch(() => ({}));
+            console.log('[CourierApi] Fardar API Response:', data);
+
+            if (data && (data.status === 200 || data.status === '200') && data.waybill_no) {
+                return {
+                    success: true,
+                    waybill: data.waybill_no,
+                    message: 'Fardar parcel booked successfully in Waiting Parcels'
+                };
+            } else {
+                console.warn('[CourierApi] Fardar API warning response:', data);
+                return {
+                    success: false,
+                    error: data?.status || 'Fardar API returned non-200'
+                };
+            }
+        } catch (err) {
+            console.error('[CourierApi] Fardar Network Error:', err);
+            return { success: false, error: err.message };
+        }
+    },
+
+    // Book parcel on Trans Express Dedicated REST API (https://portal.transexpress.lk/api/orders/upload/auto-without-city)
+    async createTransExpressParcel(orderData, serviceConfig) {
+        const apiKey = serviceConfig?.apiKey || 'olvsGUXYUzvDkKg19fx18VR5voxFurxikakIs0cZsKvyan4gbaRf7lg8WZbyA5RIjZUZFRgq2HnVx931';
+        const phone1 = formatFardarPhone(orderData.phone);
+        const phone2 = formatFardarPhone(orderData.phone2 || orderData.phone);
+        const description = (orderData.items && orderData.items.length > 0)
+            ? orderData.items.map(i => `${i.qty}x ${i.name}`).join(', ')
+            : 'SmartZone E-Commerce Order';
+
+        const payload = [
+            {
+                order_id: orderData.id || ('SZ-' + Date.now()),
+                customer_name: orderData.customer || 'Customer',
+                address: orderData.address || 'Sri Lanka',
+                order_description: description.slice(0, 190),
+                customer_phone: phone1,
+                customer_phone2: phone2,
+                cod_amount: Number(orderData.total || 0),
+                city: orderData.city || 'Padaviya',
+                remarks: 'SmartZone Codseez OMS'
+            }
+        ];
+
+        console.log('[CourierApi] Live Booking on Trans Express:', payload);
+
+        try {
+            const response = await fetch('https://portal.transexpress.lk/api/orders/upload/auto-without-city', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey.trim()
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => ({}));
+            console.log('[CourierApi] Trans Express API Response:', data);
+
+            let waybill = null;
+            if (data && data.orders && data.orders.length > 0 && data.orders[0].waybill_id) {
+                waybill = data.orders[0].waybill_id;
+            }
+            if (waybill) {
+                return {
+                    success: true,
+                    waybill: waybill,
+                    message: 'Trans Express parcel registered successfully'
+                };
+            } else {
+                return {
+                    success: false,
+                    error: data?.message || data?.error || 'Trans Express did not return waybill'
+                };
+            }
+        } catch (err) {
+            console.error('[CourierApi] Trans Express Network Error:', err);
+            return { success: false, error: err.message };
+        }
+    }
+};
+window.CourierApi = CourierApi;
 
 // Automated SMS Dispatch Engine via SMSLENZ (Matching User Documentation)
 const SmsGateway = {
@@ -2129,7 +2263,7 @@ function setupCreateOrderForm() {
     const form = document.getElementById('create-order-form');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // 10-Day Free Trial Expiry Check
@@ -2162,42 +2296,85 @@ function setupCreateOrderForm() {
             if (!proceed) return;
         }
 
-        const service = DeliveryServices.getById(serviceId) || DeliveryServices.getAll()[0];
-
-        // Tracking / Waybill Number logic (Manual or Auto):
-        let manualTracking = document.getElementById('order-waybill-input')?.value.trim();
-        let waybill = manualTracking;
-        if (!waybill) {
-            waybill = autoGenerateWaybillForOrder(false);
-        }
-        // Normalize any hyphens (e.g. API-5980-85660 -> API5185660, no hyphens in courier tracking)
-        if (waybill && waybill.includes('-')) {
-            waybill = waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Registering Parcel on Courier API...';
         }
 
-        const itemsTotal = currentOrderItems.reduce((acc, it) => acc + (it.price * it.qty), 0);
-        const grandTotal = itemsTotal + delCharge;
+        try {
+            const service = DeliveryServices.getById(serviceId) || DeliveryServices.getAll()[0];
+            const itemsTotal = currentOrderItems.reduce((acc, it) => acc + (it.price * it.qty), 0);
+            const grandTotal = itemsTotal + delCharge;
+            const newOrderId = 'SZ-' + Math.floor(10000 + Math.random() * 90000);
 
-        const newOrder = {
-            id: 'SZ-' + Math.floor(10000 + Math.random() * 90000),
-            customer: name,
-            phone,
-            phone2,
-            address,
-            city,
-            email,
-            serviceId: service.id,
-            provider: service.provider,
-            clientId: service.clientId || '',
-            waybill,
-            weight,
-            deliveryCharge: delCharge,
-            items: [...currentOrderItems],
-            total: grandTotal,
-            paid: 'Unpaid',
-            status: 'Dispatched',
-            date: new Date().toISOString().slice(0, 16).replace('T', ' ')
-        };
+            const tempOrderData = {
+                id: newOrderId,
+                customer: name,
+                phone,
+                phone2,
+                address,
+                city,
+                total: grandTotal,
+                weight,
+                items: currentOrderItems
+            };
+
+            const providerLower = (service?.provider || '').toLowerCase();
+            let manualTracking = document.getElementById('order-waybill-input')?.value.trim();
+            let waybill = manualTracking;
+
+            // If no manual tracking entered, book LIVE on Courier API to register in courier portal
+            if (!waybill) {
+                if (providerLower.includes('fardar')) {
+                    // Book on Fardar Express Domestic API (https://www.fdedomestic.com/api/parcel/new_api_v1.php)
+                    const fardarRes = await CourierApi.createFardarParcel(tempOrderData, service);
+                    if (fardarRes.success && fardarRes.waybill) {
+                        waybill = fardarRes.waybill;
+                        console.log('✅ Real Fardar Waybill booked in Waiting Parcels:', waybill);
+                    } else {
+                        waybill = autoGenerateWaybillForOrder(false);
+                    }
+                } else if (providerLower.includes('trans')) {
+                    // Book on Trans Express REST API
+                    const transRes = await CourierApi.createTransExpressParcel(tempOrderData, service);
+                    if (transRes.success && transRes.waybill) {
+                        waybill = transRes.waybill;
+                        console.log('✅ Real Trans Express Waybill booked:', waybill);
+                    } else {
+                        waybill = autoGenerateWaybillForOrder(false);
+                    }
+                } else {
+                    waybill = autoGenerateWaybillForOrder(false);
+                }
+            }
+
+            // Normalize any hyphens (e.g. API-5980-85660 -> API5185660, no hyphens in courier tracking)
+            if (waybill && waybill.includes('-')) {
+                waybill = waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+            }
+
+            const newOrder = {
+                id: newOrderId,
+                customer: name,
+                phone,
+                phone2,
+                address,
+                city,
+                email,
+                serviceId: service.id,
+                provider: service.provider,
+                clientId: service.clientId || '',
+                waybill,
+                weight,
+                deliveryCharge: delCharge,
+                items: [...currentOrderItems],
+                total: grandTotal,
+                paid: 'Unpaid',
+                status: 'Dispatched',
+                date: new Date().toISOString().slice(0, 16).replace('T', ' ')
+            };
 
         // Deactivate clean zero mode if active so new order shows
         OrdersStorage.setCleanZeroMode(false);
@@ -2232,6 +2409,12 @@ function setupCreateOrderForm() {
         // Return to Dashboard
         initDemoModeButton();
         window.navigateTo('page-dashboard', 'SmartZone', 'Business Dashboard');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
+        }
     });
 }
 
@@ -3584,7 +3767,7 @@ function setupDispatchCourierModal() {
     const form = document.getElementById('dispatch-courier-form');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const orderId = document.getElementById('disp-order-id').value;
         const select = document.getElementById('disp-service-select');
@@ -3594,29 +3777,69 @@ function setupDispatchCourierModal() {
         const serviceId = select.value;
         const provider = opt.getAttribute('data-provider');
         const clientId = opt.getAttribute('data-client') || (provider.toLowerCase().includes('trans') ? '4792' : '5980');
+        const service = DeliveryServices.getById(serviceId) || { provider, clientId };
         let waybill = document.getElementById('disp-waybill-input').value.trim();
-        if (!waybill) {
-            autoGenerateDispatchWaybill(true);
-            waybill = document.getElementById('disp-waybill-input').value.trim();
-        }
         const weight = parseFloat(document.getElementById('disp-weight').value || 0.5);
 
         const orders = OrdersStorage.getAll();
         const order = orders.find(o => o.id === orderId);
         if (!order) return;
 
-        const isFardar = provider.toLowerCase().includes('fardar');
-        const defaultLocation = isFardar ? (order.city || 'City Office') : 'Peradeniya Hub';
-
-        order.serviceId = serviceId;
-        order.provider = provider;
-        order.clientId = clientId;
-        order.waybill = waybill;
         order.weight = weight;
-        order.status = 'Dispatched';
-        order.courierLocation = defaultLocation;
 
-        OrdersStorage.saveAll(orders);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Booking Parcel on Courier API...';
+        }
+
+        try {
+            const providerLower = (provider || '').toLowerCase();
+            // If no waybill entered, or if auto: book live on courier API
+            if (!waybill || waybill === 'Awaiting Courier Dispatch') {
+                if (providerLower.includes('fardar')) {
+                    // Book on Fardar Express Domestic API
+                    const fardarRes = await CourierApi.createFardarParcel(order, service);
+                    if (fardarRes.success && fardarRes.waybill) {
+                        waybill = fardarRes.waybill;
+                        console.log('✅ Real Fardar Waybill booked in Waiting Parcels:', waybill);
+                    } else {
+                        autoGenerateDispatchWaybill(true);
+                        waybill = document.getElementById('disp-waybill-input').value.trim();
+                    }
+                } else if (providerLower.includes('trans')) {
+                    // Book on Trans Express REST API
+                    const transRes = await CourierApi.createTransExpressParcel(order, service);
+                    if (transRes.success && transRes.waybill) {
+                        waybill = transRes.waybill;
+                        console.log('✅ Real Trans Express Waybill booked:', waybill);
+                    } else {
+                        autoGenerateDispatchWaybill(true);
+                        waybill = document.getElementById('disp-waybill-input').value.trim();
+                    }
+                } else {
+                    autoGenerateDispatchWaybill(true);
+                    waybill = document.getElementById('disp-waybill-input').value.trim();
+                }
+            }
+
+            if (waybill && waybill.includes('-')) {
+                waybill = waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+            }
+
+            const isFardar = providerLower.includes('fardar');
+            const defaultLocation = isFardar ? (order.city || 'City Office') : 'Peradeniya Hub';
+
+            order.serviceId = serviceId;
+            order.provider = provider;
+            order.clientId = clientId;
+            order.waybill = waybill;
+            order.weight = weight;
+            order.status = 'Dispatched';
+            order.courierLocation = defaultLocation;
+
+            OrdersStorage.saveAll(orders);
 
         // Deduct inventory stock if not already deducted
         if (order.items && order.items.length > 0) {
@@ -3641,6 +3864,12 @@ function setupDispatchCourierModal() {
 
         // Automatically open thermal sticker label print modal
         window.openThermalLabelModal(order);
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
+        }
     });
 }
 
