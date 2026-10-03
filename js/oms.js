@@ -1070,7 +1070,20 @@ const OrdersStorage = {
         }
         try {
             const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
+            if (Array.isArray(parsed)) {
+                let modified = false;
+                parsed.forEach(o => {
+                    if (o && o.waybill && typeof o.waybill === 'string' && o.waybill.includes('-') && o.waybill.startsWith('API-')) {
+                        o.waybill = o.waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+                        modified = true;
+                    }
+                });
+                if (modified) {
+                    localStorage.setItem(key, JSON.stringify(parsed));
+                }
+                return parsed;
+            }
+            return [];
         } catch (e) {
             return [];
         }
@@ -1475,6 +1488,7 @@ function renderOrdersRows(orders, tbody) {
 
         const trackUrl = getCourierTrackingUrl(o.provider, o.waybill);
         const isFardar = (o.provider || '').toLowerCase().includes('fardar');
+        const isTrans = (o.provider || '').toLowerCase().includes('trans');
         const badgeClassService = isFardar ? 'service-badge-fardar' : 'service-badge-trans';
         const service = DeliveryServices.getById(o.serviceId) || DeliveryServices.getAll().find(s => (s.provider || '').toLowerCase() === (o.provider || '').toLowerCase());
         const clientId = (service && service.clientId) || o.clientId || (isFardar ? '5980' : '4792');
@@ -2070,7 +2084,7 @@ function recalculateOrderTotals() {
     if (grandEl) grandEl.textContent = `Rs. ${grandTotal.toLocaleString()}`;
 }
 
-// Auto-generate or format tracking number based on courier
+// Auto-generate or format tracking number based on courier (No hyphens, matching real courier waybills)
 window.autoGenerateWaybillForOrder = function(forceFill = true) {
     const dsSelect = document.getElementById('order-delivery-service');
     const serviceId = dsSelect ? dsSelect.value : '';
@@ -2079,9 +2093,11 @@ window.autoGenerateWaybillForOrder = function(forceFill = true) {
 
     let waybill = '';
     if (provider.includes('fardar')) {
-        waybill = 'API-5980-' + Math.floor(10000 + Math.random() * 90000);
+        // Fardar Express format: 'API' followed directly by 7 digits, NO hyphens (e.g. API5173879)
+        waybill = 'API' + Math.floor(5100000 + Math.random() * 899999);
     } else if (provider.includes('trans')) {
-        waybill = 'BE' + Math.floor(4500000 + Math.random() * 900000);
+        // Trans Express format: 'BE' followed directly by 7 digits, NO hyphens (e.g. BE4542289)
+        waybill = 'BE' + Math.floor(4500000 + Math.random() * 899999);
     } else if (provider.includes('koombiyo')) {
         waybill = 'KMB' + Math.floor(1000000 + Math.random() * 9000000);
     } else if (provider.includes('domex')) {
@@ -2154,6 +2170,10 @@ function setupCreateOrderForm() {
         if (!waybill) {
             waybill = autoGenerateWaybillForOrder(false);
         }
+        // Normalize any hyphens (e.g. API-5980-85660 -> API5185660, no hyphens in courier tracking)
+        if (waybill && waybill.includes('-')) {
+            waybill = waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+        }
 
         const itemsTotal = currentOrderItems.reduce((acc, it) => acc + (it.price * it.qty), 0);
         const grandTotal = itemsTotal + delCharge;
@@ -2221,6 +2241,21 @@ function setupCreateOrderForm() {
 window.openThermalLabelModal = function(order) {
     const modal = document.getElementById('label-print-modal');
     if (!modal) return;
+
+    // Normalize any legacy or hyphenated waybills (e.g., API-5980-85660 -> API5185660)
+    let cleanWaybill = (order.waybill || '').trim();
+    if (cleanWaybill.includes('-')) {
+        cleanWaybill = cleanWaybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+        order.waybill = cleanWaybill;
+        try {
+            const allOrders = OrdersStorage.getAll();
+            const target = allOrders.find(o => o.id === order.id);
+            if (target) {
+                target.waybill = cleanWaybill;
+                OrdersStorage.saveAll(allOrders);
+            }
+        } catch (e) {}
+    }
 
     const isFardar = (order.provider || '').toLowerCase().includes('fardar');
     const service = DeliveryServices.getById(order.serviceId) || DeliveryServices.getAll().find(s => (s.provider || '').toLowerCase().includes(isFardar ? 'fardar' : 'trans'));
@@ -3744,8 +3779,8 @@ function executeLiveOrderTrack() {
                     <button type="button" class="btn-cancel" onclick="quickFillTrackSearch('BE4542289')">
                         Try Sample BE4542289 (Trans Express)
                     </button>
-                    <button type="button" class="btn-cancel" onclick="quickFillTrackSearch('API-5980-10025')">
-                        Try Sample API-5980-10025 (Fardar)
+                    <button type="button" class="btn-cancel" onclick="quickFillTrackSearch('API5173879')">
+                        Try Sample API5173879 (Fardar)
                     </button>
                     <a href="https://wa.me/94786800086?text=Hi%20SmartZone%2C%20I%20need%20help%20tracking%20my%20order" target="_blank" class="btn-create-order" style="padding:8px 16px; font-size:12.5px; background:#10b981; width:auto; text-decoration:none;">
                         💬 WhatsApp Dispatch Helpline

@@ -261,9 +261,12 @@
 
     <script>
         const params = new URLSearchParams(window.location.search);
-        const waybill = params.get('waybill') || 'IND111' + Math.floor(1000 + Math.random() * 9000);
+        let waybill = params.get('waybill') || ('API' + Math.floor(5100000 + Math.random() * 899999));
+        if (waybill.includes('-')) {
+            waybill = waybill.replace(/API-5980-(\d+)/i, 'API51$1').replace(/API-(\d+)/i, 'API$1').replace(/-/g, '');
+        }
         const courier = (params.get('courier') || (waybill.startsWith('BE') ? 'trans_express' : 'fardar')).toLowerCase();
-        const isFardar = (courier === 'fardar' || waybill.startsWith('IND') || waybill.startsWith('CRE'));
+        const isFardar = (courier === 'fardar' || waybill.startsWith('API') || waybill.startsWith('IND') || waybill.startsWith('CRE'));
 
         document.getElementById('label-logo').src = isFardar ? 'assets/fed-logo.webp' : 'assets/transex-logo.webp';
         document.getElementById('label-service').textContent = isFardar ? 'FED DOMESTIC COURIER' : 'TRANS EXPRESS COURIER';
