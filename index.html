@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartZone - Codseez OMS</title>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- JsBarcode & QRCode.js (Client-side libraries for Thermal 4x6" label printing) -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- Custom CSS matching Codseez OMS -->
+    <link rel="stylesheet" href="css/oms.css">
+</head>
+<body>
+
+<!-- ========================================================
+     1. SIDEBAR NAVIGATION (CODSEEZ OMS NAVY THEME)
+     ======================================================== -->
+<aside class="sidebar" id="app-sidebar">
+    <div>
+        <div class="sidebar-header">
+            <div class="sidebar-brand-group">
+                <div class="sidebar-logo-icon">
+                    <!-- Codseez OMS Hexagonal Cube SVG Logo -->
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2L25 8V20L14 26L3 20V8L14 2Z" fill="#2563eb"/>
+                        <path d="M14 2L25 8L14 14L3 8L14 2Z" fill="#38bdf8"/>
+                        <path d="M3 8L14 14V26L3 20V8Z" fill="#1d4ed8"/>
+                        <path d="M25 8L14 14V26L25 20V8Z" fill="#2563eb"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-name">Codseez OMS</div>
+            </div>
+            <button class="sidebar-collapse-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <nav class="sidebar-menu">
+            <!-- Dashboard -->
+            <a href="#" class="nav-item active" data-page="page-dashboard" data-title="SmartZone" data-sub="Business Dashboard">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="9" rx="1"/>
+                        <rect x="14" y="3" width="7" height="5" rx="1"/>
+                        <rect x="14" y="12" width="7" height="9" rx="1"/>
+                        <rect x="3" y="16" width="7" height="5" rx="1"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <!-- Orders -->
+            <a href="#" class="nav-item" data-page="page-orders" data-title="Orders" data-sub="Manage and track dispatches">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m7.5 4.27 9 5.15"/>
+                        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                        <path d="m3.3 7 8.7 5 8.7-5"/>
+                        <path d="M12 22V12"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Orders</span>
+            </a>
+
+            <!-- Track Order (Screenshot & User requirement) -->
+            <a href="#" class="nav-item" data-page="page-track-order" data-title="Track Order" data-sub="Live courier tracking & timeline">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Track Order</span>
+            </a>
+
+            <!-- Customers -->
+            <a href="#" class="nav-item" data-page="page-customers" data-title="Customers" data-sub="Customer directory & fake detection">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Customers</span>
+            </a>
+
+            <!-- Products -->
+            <a href="#" class="nav-item" data-page="page-products" data-title="Products" data-sub="Inventory & stock list">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                        <circle cx="7" cy="7" r="1"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Products</span>
+            </a>
+
+            <!-- Customer Online Storefront Link -->
+            <a id="nav-item-store" href="store.html" target="_blank" class="nav-item" title="Open customer-facing online shop in new tab" style="border-left:2px solid #0284c7;">
+                <span class="nav-icon" style="color:#0284c7;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                </span>
+                <span class="nav-text" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                    <span>Online Store</span>
+                    <span style="font-size:9.5px; background:#0284c7; color:#fff; padding:1px 5px; border-radius:4px; font-weight:800;">LIVE</span>
+                </span>
+            </a>
+
+            <!-- Reminders -->
+            <a href="#" class="nav-item" data-page="page-reminders" data-title="Reminders" data-sub="Delivery follow-up reminders">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Reminders</span>
+            </a>
+
+            <!-- Sales -->
+            <a href="#" class="nav-item" data-page="page-sales" data-title="Sales" data-sub="Sales reports and metrics">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                        <polyline points="16 7 22 7 22 13"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Sales</span>
+            </a>
+
+            <!-- Expenses -->
+            <a href="#" class="nav-item" data-page="page-expenses" data-title="Expenses" data-sub="Operational & courier expenses">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="20" height="14" x="2" y="5" rx="2"/>
+                        <line x1="2" x2="22" y1="10" y2="10"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Expenses</span>
+            </a>
+
+            <!-- Team -->
+            <a href="#" class="nav-item" data-page="page-team" data-title="Team" data-sub="Staff and permissions">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Team</span>
+            </a>
+
+            <!-- Settings -->
+            <a href="#" class="nav-item" data-page="page-settings" data-title="Settings" data-sub="Delivery services & preferences">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Settings</span>
+            </a>
+
+            <!-- Super Admin Panel (Manage Stores & Subscriptions) -->
+            <a href="#" class="nav-item" id="nav-item-admin" data-page="page-admin" data-title="Admin Console" data-sub="Manage merchant accounts & 10-day trials">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Admin Panel</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- User Profile Footer (Screenshot 1) -->
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar" id="sidebar-user-avatar">PM</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebar-user-name">Pamidu mihiranga</div>
+                <div class="user-role" id="sidebar-user-role">Owner</div>
+            </div>
+            <button class="user-menu-dots" id="btn-sidebar-user-menu" title="User Details" onclick="showCurrentUserStatus()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <circle cx="12" cy="19" r="2"/>
+                </svg>
+            </button>
+        </div>
+        <a class="signout-link" onclick="handleUserSignOut()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span class="signout-text">Sign Out</span>
+        </a>
+    </div>
+</aside>
+
+<!-- ========================================================
+     2. MAIN CONTENT WRAPPER
+     ======================================================== -->
+<main class="main-wrapper">
+    <!-- Admin Impersonation Notice Banner -->
+    <div id="impersonation-banner" style="display:none; background:#fffbeb; border-bottom:1px solid #fde68a; padding:8px 20px; font-size:12.5px; color:#92400e; justify-content:space-between; align-items:center;">
+        <span>👁️ Viewing Store as: <strong id="imp-store-name" style="color:#b45309;">Store Name</strong> (<span id="imp-merchant-id">usr_demo</span>)</span>
+        <button type="button" class="btn-cancel" style="background:#fff; font-weight:700; color:#0f172a; padding:3px 10px; border:1px solid #f59e0b; border-radius:4px; font-size:12px; cursor:pointer;" onclick="returnToSuperAdmin()">
+            ⬅️ Return to Super Admin
+        </button>
+    </div>
+
+    <!-- Top Navbar Bar -->
+    <header class="top-navbar">
+        <div class="page-heading">
+            <h1 id="top-page-title">SmartZone</h1>
+            <p id="top-page-subtitle">Business Dashboard</p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+            <a id="btn-top-back" class="btn-back-link" style="display:none;" onclick="navigateTo('page-dashboard', 'SmartZone', 'Business Dashboard')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Back
+            </a>
+            <button id="btn-top-add-product" class="btn-create-order" style="display:none;" onclick="openAddProductModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Product
+            </button>
+            <a id="btn-top-store" href="store.html" target="_blank" class="btn-cancel" style="font-weight:700; display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px; border:1px solid #bae6fd; background:#f0f9ff; color:#0369a1; text-decoration:none; border-radius:6px;" title="Open Customer Online Shop in new tab">
+                <span>🌐 Customer Store</span>
+            </a>
+            <button type="button" class="btn-cancel" style="font-weight:700; display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;" onclick="navigateTo('page-track-order', 'Track Order', 'Live courier tracking & timeline')" title="Track live courier status">
+                <span>🔍 Track Order</span>
+            </button>
+            <button id="btn-top-auth-portal" class="btn-cancel" style="font-weight:700; display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;" onclick="openAuthPortal('login')" title="Open Login Portal or Switch Account">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                <span id="top-auth-btn-label">Sign In / Register</span>
+            </button>
+            <button id="btn-top-create-order" class="btn-create-order" onclick="navigateTo('page-create-order', 'Create Order', 'SmartZone')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create Order
+            </button>
+        </div>
+    </header>
+
+    <div class="content-body">
+
+        <!-- 10-Day Free Trial Status Banner (Shown for Trial Merchants) -->
+        <div id="trial-status-banner" class="trial-banner" style="display:none;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span id="trial-pulse-dot" class="pulse-dot"></span>
+                <span id="trial-banner-text">⏳ 10-Day Free Demo: <strong>10 days remaining</strong> (Expires in 10 days)</span>
+            </div>
+            <button type="button" class="btn-activate-subscription" onclick="openSubscriptionPaymentModal()">
+                💳 Activate Full Subscription
+            </button>
+        </div>
+
+        <!-- ========================================================
+             PAGE 1: DASHBOARD (SCREENSHOT 1 EXACT MATCH)
+             ======================================================== -->
+        <section id="page-dashboard" class="page-view active">
+            <!-- Period Selector & Demo State Switcher -->
+            <div class="period-select-wrap">
+                <div class="period-select-box">
+                    <select class="period-select" id="dash-period-select" onchange="handlePeriodChange()">
+                        <option value="this_month" selected>This month</option>
+                        <option value="last_30">Last 30 days</option>
+                        <option value="today">Today</option>
+                        <option value="all_time">All time</option>
+                    </select>
+                    <span class="period-chevron">⌵</span>
+                </div>
+
+                <!-- State Switcher: allows switching between Codseez pristine 0-state and live sample orders -->
+                <div class="demo-data-toggle-wrap">
+                    <button type="button" class="btn-pill-subtle" id="btn-toggle-demo-view" onclick="toggleDemoDataMode()">
+                        ⚡ Switch to Clean 0-View
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4 Top KPI Metric Cards (Screenshot 1) -->
+            <div class="kpi-row">
+                <!-- 1. Total Orders -->
+                <div class="card-kpi">
+                    <div>
+                        <div class="kpi-label">TOTAL ORDERS</div>
+                        <div class="kpi-num" id="dash-total-orders">0</div>
+                        <div class="kpi-helper" id="dash-paid-count">0 paid</div>
+                    </div>
+                    <div class="kpi-icon-pill icon-pill-orders">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 2. Sales -->
+                <div class="card-kpi">
+                    <div>
+                        <div class="kpi-label">SALES</div>
+                        <div class="kpi-num" id="dash-sales">Rs. 0</div>
+                        <div class="kpi-helper" id="dash-collected">Collected: Rs. 0</div>
+                    </div>
+                    <div class="kpi-icon-pill icon-pill-sales">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9 7h6M9 11h6M9 15h3.5a2.5 2.5 0 0 0 0-5H9"/>
+                            <path d="M12 17l4 4"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 3. Net Profit -->
+                <div class="card-kpi">
+                    <div>
+                        <div class="kpi-label">NET PROFIT</div>
+                        <div class="kpi-num" id="dash-net-profit">Rs. 0</div>
+                        <div class="kpi-helper" id="dash-expenses">Expenses: Rs. 0</div>
+                    </div>
+                    <div class="kpi-icon-pill icon-pill-profit">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                            <polyline points="16 7 22 7 22 13"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 4. Outstanding -->
+                <div class="card-kpi">
+                    <div>
+                        <div class="kpi-label">OUTSTANDING</div>
+                        <div class="kpi-num" id="dash-outstanding">Rs. 0</div>
+                        <div class="kpi-helper" id="dash-unpaid-count">0 unpaid</div>
+                    </div>
+                    <div class="kpi-icon-pill icon-pill-outstanding">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Split: Business Performance + Upcoming Reminders (Screenshot 1) -->
+            <div class="dashboard-grid-middle">
+                <!-- Business Performance -->
+                <div class="white-panel" style="margin-bottom:0;">
+                    <div class="panel-title-bar">
+                        <div>
+                            <div class="panel-title">Business Performance</div>
+                            <div class="panel-subtitle">Sales & profit trend for period</div>
+                        </div>
+                    </div>
+                    <div class="empty-state-box" id="performance-chart-box">
+                        No data for this period
+                    </div>
+                </div>
+
+                <!-- Upcoming Reminders -->
+                <div class="white-panel" style="margin-bottom:0;">
+                    <div class="panel-title-bar">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
+                            <div class="panel-title">Upcoming Reminders</div>
+                        </div>
+                        <a href="javascript:void(0)" class="panel-link" onclick="navigateTo('page-reminders', 'Reminders', 'Delivery follow-up reminders')">See all</a>
+                    </div>
+                    <div class="empty-state-box">
+                        No upcoming reminders
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders Section (Screenshot 1) -->
+            <div class="white-panel" style="margin-top:22px;">
+                <div class="panel-title-bar">
+                    <div class="panel-title">Recent Orders</div>
+                    <a href="javascript:void(0)" class="panel-link" onclick="navigateTo('page-orders', 'Orders', 'All customer dispatches')">See all</a>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ORDER</th>
+                                <th>CUSTOMER</th>
+                                <th>DATE</th>
+                                <th>STATUS</th>
+                                <th>TOTAL</th>
+                                <th>PAID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-orders-tbody">
+                            <!-- Populated dynamically: Shows "No orders this period" when empty -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE 2: CREATE ORDER (FULL DISPATCH WORKFLOW)
+             ======================================================== -->
+        <section id="page-create-order" class="page-view">
+            <form id="create-order-form">
+                <div class="create-order-grid">
+                    
+                    <!-- Left Column: Customer & Delivery Info -->
+                    <div>
+                        <!-- Customer Information Card -->
+                        <div class="form-card">
+                            <h3 class="form-card-title">Customer Information</h3>
+
+                            <div class="field-group">
+                                <label class="field-tag">FULL NAME <span class="required-star">*</span></label>
+                                <input type="text" class="form-ctrl" id="order-cust-name" placeholder="Customer full name" required>
+                            </div>
+
+                            <div class="row-2col">
+                                <div class="field-group">
+                                    <label class="field-tag">PHONE 1 <span class="required-star">*</span></label>
+                                    <input type="text" class="form-ctrl" id="order-cust-phone" placeholder="07XXXXXXXX" required>
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-tag">PHONE 2</label>
+                                    <input type="text" class="form-ctrl" id="order-cust-phone2" placeholder="07XXXXXXXX">
+                                </div>
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-tag">ADDRESS <span class="required-star">*</span></label>
+                                <textarea class="form-ctrl" id="order-cust-address" rows="3" placeholder="Delivery street, house number, area" required></textarea>
+                            </div>
+
+                            <div class="row-2col">
+                                <div class="field-group">
+                                    <label class="field-tag">CITY <span class="required-star">*</span></label>
+                                    <input type="text" class="form-ctrl" id="order-cust-city" placeholder="e.g. Kandy, Colombo, Galle" required>
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-tag">EMAIL</label>
+                                    <input type="email" class="form-ctrl" id="order-cust-email" placeholder="customer@example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Service Card -->
+                        <div class="form-card">
+                            <div class="field-group">
+                                <label class="field-tag">DELIVERY SERVICE</label>
+                                <div class="select-wrapper">
+                                    <select class="form-ctrl select-styled" id="order-delivery-service">
+                                        <!-- Populated dynamically from Delivery Services Settings -->
+                                    </select>
+                                    <span class="select-chevron">⌵</span>
+                                </div>
+                            </div>
+
+                            <!-- WAYBILL / TRACKING NUMBER (Manual or Auto-Generated) -->
+                            <div class="field-group">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <label class="field-tag" style="margin-bottom:0;">WAYBILL / TRACKING NUMBER</label>
+                                    <button type="button" class="btn-pill-subtle" onclick="autoGenerateWaybillForOrder()" style="font-size:11px; padding:2px 8px; color:var(--primary); font-weight:700;">
+                                        ⚡ Auto-Generate
+                                    </button>
+                                </div>
+                                <div class="input-with-icon">
+                                    <input type="text" class="form-ctrl" id="order-waybill-input" placeholder="Enter tracking if you have one, or leave blank to auto-generate">
+                                    <button type="button" class="btn-toggle-eye" onclick="autoGenerateWaybillForOrder()" title="Auto generate waybill number">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                    </button>
+                                </div>
+                                <div style="font-size:11px; color:#64748b; margin-top:4px;" id="waybill-helper-text">
+                                    Auto-generates official courier tracking if left empty.
+                                </div>
+                            </div>
+
+                            <div class="row-2col">
+                                <div class="field-group">
+                                    <label class="field-tag">TOTAL WEIGHT (KG)</label>
+                                    <input type="number" step="0.1" class="form-ctrl" id="order-total-weight" value="0.5">
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-tag">DELIVERY CHARGE (RS.)</label>
+                                    <input type="number" class="form-ctrl" id="order-delivery-charge" value="500">
+                                </div>
+                            </div>
+                            <div style="font-size:11.5px; color:var(--text-muted); margin-top:-8px;" id="delivery-charge-helper">
+                                Default: Rs. 500 base + Rs. 0/extra kg
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Order Items & Confirm Buttons -->
+                    <div>
+                        <div class="form-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                                <h3 style="font-size:15px; font-weight:700; color:var(--text-primary);">Order Items</h3>
+                                <button type="button" class="btn-add-pill" id="btn-add-item-modal">+ Add Item</button>
+                            </div>
+
+                            <!-- Click to Add Dropzone -->
+                            <div id="items-dropzone" class="items-dropzone">
+                                <div style="font-size:24px; margin-bottom:4px;">+</div>
+                                <div style="font-weight:700; font-size:13px;">Click to add products</div>
+                                <div style="font-size:11.5px; opacity:0.8;">Add item title, quantity & unit price</div>
+                            </div>
+
+                            <!-- Rendered Line Items -->
+                            <div id="order-items-rendered-list"></div>
+
+                            <!-- Cost Summary -->
+                            <div style="border-top:1px solid var(--border-color); padding-top:14px; margin-top:14px;">
+                                <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">
+                                    <span>Items Subtotal:</span>
+                                    <strong id="summary-items-total">Rs. 0</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">
+                                    <span>Delivery Fee:</span>
+                                    <strong id="summary-delivery-charge">Rs. 500</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:var(--text-primary); margin-top:10px; border-top:1px dashed var(--border-color); padding-top:10px;">
+                                    <span>Total (COD Amount):</span>
+                                    <span id="summary-grand-total" style="color:var(--primary);">Rs. 500</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons Stack -->
+                            <div class="order-actions-stack">
+                                <button type="submit" class="btn-confirm-order">
+                                    Confirm Order
+                                </button>
+                                <button type="button" class="btn-confirm-unpaid" onclick="document.getElementById('create-order-form').dispatchEvent(new Event('submit'))">
+                                    Confirm as Unpaid Order
+                                </button>
+                                <button type="button" class="btn-save-draft" onclick="alert('Order saved to Drafts.')">
+                                    Save as Draft
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </section>
+
+        <!-- ========================================================
+             PAGE 3: SETTINGS (SCREENSHOTS 2 & 3 BACKGROUND)
+             ======================================================== -->
+        <section id="page-settings" class="page-view">
+            <div class="settings-grid">
+                
+                <!-- Left: Data Export & SMS Settings -->
+                <div>
+                    <!-- Data Export Card -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <div class="setting-card-title">
+                                <div class="setting-icon-box">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                        <polyline points="17 21 17 13 7 13 7 21"/>
+                                        <polyline points="7 3 7 8 15 8"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="setting-title-text">Data Export</div>
+                                    <div class="setting-sub-text">Export data as a ZIP file</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="export-checkbox-list">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="exp-products" checked>
+                                <span>Products</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="exp-orders" checked>
+                                <span>Orders</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="exp-sales" checked>
+                                <span>Sales Report</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="exp-customers" checked>
+                                <span>Customers</span>
+                            </label>
+                        </div>
+
+                        <button type="button" class="btn-export-download" onclick="executeDataExport()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+
+                    <!-- SMS Settings Card (Screenshot 2 & 3) -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <div class="setting-card-title">
+                                <div class="setting-icon-box">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="setting-title-text">SMS Settings</div>
+                            </div>
+                            <button type="button" class="btn-configure-pill" onclick="openSmsSettingsModal()">
+                                Configure
+                            </button>
+                        </div>
+
+                        <div class="setting-meta-row">
+                            <span class="setting-meta-label">Dispatch SMS:</span>
+                            <span class="setting-meta-val" id="sms-status-badge">Disabled</span>
+                        </div>
+                        <div class="setting-meta-row">
+                            <span class="setting-meta-label">Sender IDs:</span>
+                            <span class="setting-meta-val" id="sms-sender-count">0 brands configured</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Delivery Services & Brands -->
+                <div>
+                    <!-- Delivery Services Card -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <div class="setting-card-title">
+                                <div class="setting-icon-box">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="3" width="15" height="13"/>
+                                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="setting-title-text">Delivery Services</div>
+                                    <div id="ds-configured-count" class="setting-sub-text">2 configured</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-pill" onclick="openAddDeliveryServiceModal()">
+                                + Add
+                            </button>
+                        </div>
+
+                        <!-- Rendered List of Delivery Services -->
+                        <div id="delivery-services-list"></div>
+                    </div>
+
+                    <!-- Brands Card -->
+                    <div class="setting-card">
+                        <div class="setting-card-header">
+                            <div class="setting-card-title">
+                                <div class="setting-icon-box">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                                        <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
+                                        <path d="M2 7h20"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="setting-title-text">Brands</div>
+                                    <div id="brands-configured-count" class="setting-sub-text">1 configured</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-pill" onclick="openAddBrandModal()">+ Add</button>
+                        </div>
+
+                        <div id="brands-rendered-list">
+                            <div class="brand-item-card">
+                                <div class="brand-info-left">
+                                    <div class="brand-avatar-box">S</div>
+                                    <div>
+                                        <div class="brand-name-title">SmartZone</div>
+                                        <div class="brand-sub-desc">Default Store</div>
+                                    </div>
+                                </div>
+                                <span class="badge-brand-default">Default</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE: LIVE ORDER TRACKING (SCREENSHOT & REVERSE API MATCH)
+             ======================================================== -->
+        <section id="page-track-order" class="page-view">
+            <!-- Search Card -->
+            <div class="track-search-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <h2 style="font-size:18px; font-weight:800; color:#0f172a;">🔍 Live Courier & Order Tracking</h2>
+                        <p style="font-size:13px; color:#64748b; margin-top:2px;">
+                            Track packages in real time across Sri Lanka with live Trans Express & Fardar Express updates.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-cancel" style="font-size:12px; font-weight:700; color:#0284c7; border:1px solid #bae6fd; background:#f0f9ff;" onclick="copyStorefrontTrackingLink()">
+                        🔗 Copy Customer Tracking Link
+                    </button>
+                </div>
+
+                <div class="track-search-bar">
+                    <input type="text" id="track-page-query-input" class="track-search-input" placeholder="Enter Tracking # (e.g. BE4542289, API-5980-10024) or Order ID (e.g. SZ-10024) or Phone #..." onkeydown="if(event.key==='Enter') executeLiveOrderTrack()">
+                    <button type="button" class="btn-create-order" style="padding:0 24px; font-size:14px; width:auto;" onclick="executeLiveOrderTrack()">
+                        🚀 Track Order
+                    </button>
+                </div>
+
+                <div class="track-quick-chips">
+                    <span style="font-size:11.5px; font-weight:700; color:#64748b;">Quick Search:</span>
+                    <button type="button" class="track-chip" onclick="quickFillTrackSearch('BE4542289')">
+                        BE4542289 (Trans Express)
+                    </button>
+                    <button type="button" class="track-chip" onclick="quickFillTrackSearch('API-5980-10025')">
+                        API-5980-10025 (Fardar)
+                    </button>
+                    <button type="button" class="track-chip" onclick="quickFillTrackSearch('SZ-10024')">
+                        Order #SZ-10024
+                    </button>
+                    <button type="button" class="track-chip" onclick="quickFillTrackSearch('0778901234')">
+                        📞 0778901234
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Tracking Results Display -->
+            <div id="track-result-wrapper">
+                <!-- Rendered by renderTrackOrderView() in oms.js -->
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE 4: ORDERS LIST (ALL DISPATCHES)
+             ======================================================== -->
+        <section id="page-orders" class="page-view">
+            <div class="white-panel">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title">All Customer Orders</div>
+                        <div class="panel-subtitle">Manage tracking, waybills, and print shipping stickers</div>
+                    </div>
+                    <button class="btn-create-order" onclick="navigateTo('page-create-order', 'Create Order', 'SmartZone')">
+                        + New Order
+                    </button>
+                </div>
+
+                <!-- Orders Filter Bar -->
+                <div class="products-filter-bar" style="margin-bottom:14px; border:none; padding:0;">
+                    <div class="search-input-wrap">
+                        <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="text" id="order-search-input" placeholder="Search by Order #, customer, phone, or waybill..." oninput="filterOrdersTable()">
+                    </div>
+
+                    <div class="select-wrapper" style="width:220px;">
+                        <select class="form-ctrl select-styled" id="order-filter-courier" onchange="filterOrdersTable()">
+                            <option value="">All Delivery Services</option>
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+
+                    <div class="select-wrapper" style="width:160px;">
+                        <select class="form-ctrl select-styled" id="order-filter-status" onchange="filterOrdersTable()">
+                            <option value="">All Statuses</option>
+                            <option value="Dispatched">Dispatched</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ORDER</th>
+                                <th>WAYBILL / COURIER</th>
+                                <th>CUSTOMER</th>
+                                <th>ITEMS</th>
+                                <th>DATE</th>
+                                <th>STATUS</th>
+                                <th>TOTAL</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-orders-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE 5: CUSTOMERS & FAKE DETECTION
+             ======================================================== -->
+        <section id="page-customers" class="page-view">
+            <div class="white-panel">
+                <div class="panel-title-bar">
+                    <div class="panel-title">🛡️ Customer Risk & Fraud Detection Engine</div>
+                </div>
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+                    Validate Sri Lankan mobile format (07X) and check dummy repeating numbers before dispatching:
+                </p>
+
+                <div class="row-2col" style="max-width:650px; margin-bottom:14px;">
+                    <div>
+                        <label class="field-tag">PHONE NUMBER</label>
+                        <input type="text" id="chk-phone" class="form-ctrl" value="0771234567" placeholder="07XXXXXXXX">
+                    </div>
+                    <div>
+                        <label class="field-tag">ADDRESS</label>
+                        <input type="text" id="chk-addr" class="form-ctrl" value="No. 45, Temple Road, Kandy">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-create-order" style="width:auto;" onclick="runCustomFraudCheck()">
+                    🔍 Run Verification
+                </button>
+                <div id="chk-result-box" style="margin-top:16px;"></div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE 6: EXPENSES & TRUE PROFIT
+             ======================================================== -->
+        <section id="page-expenses" class="page-view">
+            <div class="white-panel" style="max-width:700px;">
+                <div class="panel-title-bar">
+                    <div class="panel-title">💰 True Order Profit Calculator</div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">Selling Price (Rs.)</label>
+                        <input type="number" id="ep-selling" class="form-ctrl" value="4500" oninput="calcEpProfit()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">Product Cost (Rs.)</label>
+                        <input type="number" id="ep-cost" class="form-ctrl" value="1800" oninput="calcEpProfit()">
+                    </div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">Courier Delivery Fee (Rs.)</label>
+                        <input type="number" id="ep-courier" class="form-ctrl" value="500" oninput="calcEpProfit()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">Packaging / Flyer (Rs.)</label>
+                        <input type="number" id="ep-pack" class="form-ctrl" value="80" oninput="calcEpProfit()">
+                    </div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">Ad Spend / Facebook CPA (Rs.)</label>
+                        <input type="number" id="ep-ad" class="form-ctrl" value="650" oninput="calcEpProfit()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">RTO Status</label>
+                        <select id="ep-rto" class="form-ctrl" onchange="calcEpProfit()">
+                            <option value="0">Delivered Successfully</option>
+                            <option value="1">Returned (RTO 1.5x Penalty)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; text-align:center; margin-top:14px;">
+                    <div style="font-size:12px; font-weight:700; color:#64748b;">ESTIMATED TRUE NET PROFIT:</div>
+                    <div id="ep-profit-result" style="font-size:32px; font-weight:800; color:#10b981; margin:6px 0;">Rs. 1,470.00</div>
+                    <div id="ep-margin-result" style="font-size:12px; color:#64748b;">Margin: 32.7%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PAGE: PRODUCTS INVENTORY (SCREENSHOT MATCH)
+             ======================================================== -->
+        <section id="page-products" class="page-view">
+            <!-- 4 Metric Cards (Matching Screenshot) -->
+            <div class="kpi-row" style="margin-bottom:20px;">
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">INVENTORY COST</div>
+                    <div class="kpi-num kpi-num-blue" id="prod-kpi-cost">Rs. 0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">RETAIL VALUE</div>
+                    <div class="kpi-num kpi-num-blue" id="prod-kpi-value">Rs. 0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">LOW STOCK</div>
+                    <div class="kpi-num kpi-num-amber" id="prod-kpi-low">0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">OUT OF STOCK</div>
+                    <div class="kpi-num kpi-num-red" id="prod-kpi-out">0</div>
+                </div>
+            </div>
+
+            <!-- Filter Bar (Matching Screenshot) -->
+            <div class="products-filter-bar">
+                <div class="search-input-wrap">
+                    <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="prod-search-input" placeholder="Search by ID or description..." oninput="filterProductsTable()">
+                </div>
+
+                <div class="select-wrapper" style="width:160px;">
+                    <select class="form-ctrl select-styled" id="prod-filter-category" onchange="filterProductsTable()">
+                        <option value="">Select...</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Audio">Audio</option>
+                        <option value="Watches">Watches</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Fashion">Fashion</option>
+                    </select>
+                    <span class="select-chevron">⌵</span>
+                </div>
+
+                <div class="select-wrapper" style="width:160px;">
+                    <select class="form-ctrl select-styled" id="prod-filter-status" onchange="filterProductsTable()">
+                        <option value="">Select...</option>
+                        <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock (≤ 5)</option>
+                        <option value="out_of_stock">Out of Stock (0)</option>
+                    </select>
+                    <span class="select-chevron">⌵</span>
+                </div>
+
+                <div class="select-wrapper" style="width:140px;">
+                    <select class="form-ctrl select-styled" id="prod-sort-select" onchange="filterProductsTable()">
+                        <option value="stock_asc">Stock ↑</option>
+                        <option value="stock_desc">Stock ↓</option>
+                        <option value="price_desc">Price ↓</option>
+                        <option value="name_asc">Name A-Z</option>
+                    </select>
+                    <span class="select-chevron">⌵</span>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="white-panel" style="padding:0; overflow:hidden;">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;"><input type="checkbox" id="chk-select-all-products"></th>
+                                <th>PRODUCT ID</th>
+                                <th>DESCRIPTION</th>
+                                <th>STOCK</th>
+                                <th>COST</th>
+                                <th>PRICE</th>
+                                <th>WEIGHT</th>
+                                <th>MARGIN</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section id="page-reminders" class="page-view">
+            <div class="white-panel"><div class="panel-title">Upcoming Reminders</div><div class="empty-state-box">No upcoming reminders</div></div>
+        </section>
+        <section id="page-sales" class="page-view">
+            <div class="white-panel"><div class="panel-title">Sales Analytics</div><div class="empty-state-box">Sales trend charts and monthly performance reports</div></div>
+        </section>
+        <section id="page-team" class="page-view">
+            <div class="white-panel"><div class="panel-title">Team</div><div class="empty-state-box">1 User (Pamidu mihiranga - Owner)</div></div>
+        </section>
+
+        <!-- ========================================================
+             PAGE 7: SUPER ADMIN CONSOLE (MERCHANT ACCOUNTS & TRIALS)
+             ======================================================== -->
+        <section id="page-admin" class="page-view">
+            <!-- 4 Admin Metric Cards -->
+            <div class="kpi-row" style="margin-bottom:20px;">
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">REGISTERED STORES</div>
+                    <div class="kpi-num kpi-num-blue" id="admin-kpi-total">0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">ACTIVE (PAID)</div>
+                    <div class="kpi-num" style="color:#10b981;" id="admin-kpi-paid">0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">ACTIVE 10-DAY TRIALS</div>
+                    <div class="kpi-num kpi-num-amber" id="admin-kpi-trial">0</div>
+                </div>
+                <div class="card-kpi-simple">
+                    <div class="kpi-label">EXPIRED / BLOCKED</div>
+                    <div class="kpi-num kpi-num-red" id="admin-kpi-expired">0</div>
+                </div>
+            </div>
+
+            <!-- Stores & Merchant Management Table -->
+            <div class="white-panel" style="margin-bottom:22px;">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title">👥 Merchant Accounts & Store Management</div>
+                        <div class="panel-subtitle">Manage 10-day trials, extend trial days, approve payments, or login as store</div>
+                    </div>
+                    <button class="btn-create-order" onclick="openAddMerchantModal()">
+                        + Add Store / Merchant
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>STORE & MERCHANT</th>
+                                <th>CONTACT</th>
+                                <th>ROLE</th>
+                                <th>STATUS</th>
+                                <th>DAYS LEFT</th>
+                                <th>EXPIRY DATE</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody">
+                            <!-- Populated dynamically by Admin JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subscription Payments & Bank Slips -->
+            <div class="white-panel">
+                <div class="panel-title-bar">
+                    <div>
+                        <div class="panel-title">💳 Subscription Payments & Bank Slips</div>
+                        <div class="panel-subtitle">Review bank transfer deposits & approve full access</div>
+                    </div>
+                    <button class="btn-cancel" style="border:1px solid #e2e8f0; font-weight:700;" onclick="renderAdminPaymentsTable()">
+                        ↻ Refresh
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>STORE</th>
+                                <th>PLAN</th>
+                                <th>AMOUNT</th>
+                                <th>METHOD / REFERENCE</th>
+                                <th>DATE</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-payments-tbody">
+                            <!-- Populated dynamically by Admin JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- ========================================================
+     MODAL 1: ADD DELIVERY SERVICE (SCREENSHOT 2 EXACT MATCH)
+     ======================================================== -->
+<div id="add-delivery-service-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3 id="modal-ds-title">Add Delivery Service</h3>
+            <button type="button" class="modal-close-btn" onclick="closeDeliveryServiceModal()">✕</button>
+        </div>
+
+        <form id="add-delivery-service-form">
+            <input type="hidden" id="modal-ds-id" value="">
+
+            <div class="modal-body">
+                <!-- Service Name -->
+                <div class="field-group">
+                    <label class="field-tag">SERVICE NAME <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="modal-ds-name" placeholder="" required>
+                </div>
+
+                <!-- Provider Dropdown (matching Screenshot 2) -->
+                <div class="field-group">
+                    <label class="field-tag">PROVIDER <span class="required-star">*</span></label>
+                    <div class="select-wrapper">
+                        <select class="form-ctrl select-styled" id="modal-ds-provider" onchange="handleProviderChange()" required>
+                            <option value="Trans Express" selected>Trans Express</option>
+                            <option value="Fardar Express">Fardar Express</option>
+                            <option value="Koombiyo Delivery">Koombiyo Delivery</option>
+                            <option value="Domex">Domex</option>
+                            <option value="Prompt Xpress">Prompt Xpress</option>
+                            <option value="Citypak">Citypak</option>
+                            <option value="Royal Express">Royal Express</option>
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                </div>
+
+                <!-- Base Cost & Extra Cost / Kg -->
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">BASE COST (RS.)</label>
+                        <input type="number" class="form-ctrl" id="modal-ds-base-cost" placeholder="">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">EXTRA COST/KG</label>
+                        <input type="number" class="form-ctrl" id="modal-ds-extra-cost" placeholder="">
+                    </div>
+                </div>
+
+                <!-- Base Charge & Extra Charge / Kg -->
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">BASE CHARGE (RS.)</label>
+                        <input type="number" class="form-ctrl" id="modal-ds-base-charge" placeholder="">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">EXTRA CHARGE/KG</label>
+                        <input type="number" class="form-ctrl form-ctrl-extra" id="modal-ds-extra-charge" placeholder="">
+                    </div>
+                </div>
+
+                <!-- Client ID & API Key (Crucial for Fardar Client ID e.g. 5980 and Trans Express 4792) -->
+                <div class="row-2col">
+                    <div class="field-group" id="group-client-id">
+                        <label class="field-tag" id="modal-ds-client-label">
+                            CLIENT ID <span class="required-star" id="modal-ds-client-star">*</span>
+                        </label>
+                        <input type="text" class="form-ctrl" id="modal-ds-client-id" placeholder="e.g. 5980" value="">
+                        <div style="font-size:11px; color:#0284c7; margin-top:4px;" id="modal-ds-client-hint">
+                            Required for Fardar (5980) & Trans (4792)
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-tag">API KEY <span class="required-star">*</span></label>
+                        <div class="input-with-icon">
+                            <input type="password" class="form-ctrl" id="modal-ds-api-key" placeholder="Enter API Key" value="">
+                            <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('modal-ds-api-key', this)" title="Show/Hide API Key">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div style="font-size:11px; color:#64748b; margin-top:4px;" id="modal-ds-api-hint">
+                            Courier Portal API Token
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reverse API Webhook URL (Dynamic Domain for Fardar & TransExpress) -->
+                <div class="field-group" style="margin-top:10px;">
+                    <label class="field-tag">REVERSE API WEBHOOK URL (LIVE TRACKING UPDATES)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" class="form-ctrl" id="modal-ds-webhook" readonly value="" placeholder="Detecting dynamic domain webhook URL..." style="background:#f8fafc; font-family:'JetBrains Mono'; font-size:12px; font-weight:600; color:#0369a1;">
+                        <button type="button" class="btn-cancel" style="font-size:11.5px; font-weight:700; color:#2563eb; padding:0 12px; border:1px solid #bfdbfe; background:#eff6ff; white-space:nowrap;" onclick="copyModalWebhookUrl()">
+                            📋 Copy
+                        </button>
+                    </div>
+                    <div style="font-size:11px; color:#64748b; margin-top:4px;" id="modal-ds-webhook-hint">
+                        💡 Automatically uses your current website domain! Paste this URL into your Courier Portal: <strong>TransExpress Web Hook</strong> or <strong>Fardar Reverse API</strong> to receive live delivery status updates!
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeDeliveryServiceModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal" id="btn-submit-ds">Add Service</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 2: SMS SETTINGS (SCREENSHOT 3 EXACT MATCH)
+     ======================================================== -->
+<div id="sms-settings-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3>SMS Settings</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSmsSettingsModal()">✕</button>
+        </div>
+
+        <form id="sms-settings-form">
+            <div class="modal-body">
+                <!-- Toggle Row (Screenshot 3) -->
+                <div class="sms-toggle-row">
+                    <label class="sms-toggle-label" for="sms-enable-dispatch">Enable Dispatch SMS</label>
+                    <label class="switch">
+                        <input type="checkbox" id="sms-enable-dispatch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- Dispatch Message Template (Screenshot 3) -->
+                <div class="field-group" style="margin-top:16px;">
+                    <div class="field-header-row">
+                        <label class="field-tag">DISPATCH MESSAGE</label>
+                        <a href="javascript:void(0)" class="link-reset-default" onclick="resetSmsTemplateDefault()">Reset to default</a>
+                    </div>
+                    <textarea class="form-ctrl" id="sms-dispatch-message" rows="4" style="line-height:1.45;"></textarea>
+                </div>
+
+                <!-- SMS Gateway Dropdown (Screenshot 3 + SMSLENZ) -->
+                <div class="field-group">
+                    <label class="field-tag">SMS GATEWAY</label>
+                    <div class="select-wrapper">
+                        <select class="form-ctrl select-styled" id="sms-gateway-select" onchange="handleGatewayChange()">
+                            <option value="SMSLENZ" selected>SMSLENZ (smslenz.lk)</option>
+                            <option value="TEXT.LK">TEXT.LK</option>
+                            <option value="SMSWAY.LK">SMSWAY.LK</option>
+                            <option value="NOTIFY.LK">NOTIFY.LK</option>
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                    <div id="sms-gateway-hint" style="font-size:11.5px; color:#0284c7; margin-top:4px;">
+                        💡 <strong>SMSLENZ:</strong> Enter your User ID and API Key from <code>smslenz.lk/account/api-key</code>.
+                    </div>
+                </div>
+
+                <!-- SMSLENZ Specific Credentials (User ID & Base URL) -->
+                <div class="row-2col" id="sms-userid-row">
+                    <div class="field-group">
+                        <label class="field-tag">SMSLENZ USER ID <span class="required-star">*</span></label>
+                        <input type="text" class="form-ctrl" id="sms-user-id" placeholder="e.g. 2161" value="">
+                        <div style="font-size:11px; color:#64748b; margin-top:3px;">Your User ID from smslenz.lk settings page</div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">API BASE URL</label>
+                        <input type="text" class="form-ctrl" id="sms-base-url" readonly value="https://smslenz.lk/api" style="background:#f8fafc; font-family:'JetBrains Mono'; font-size:12px; color:#0369a1; font-weight:600;">
+                        <div style="font-size:11px; color:#64748b; margin-top:3px;">Endpoint: <code>/api/send-sms</code></div>
+                    </div>
+                </div>
+
+                <!-- Gateway API Token & Sender ID -->
+                <div class="row-2col" id="sms-creds-row">
+                    <div class="field-group">
+                        <label class="field-tag" id="sms-api-label">SMSLENZ API KEY <span class="required-star">*</span></label>
+                        <div class="input-with-icon">
+                            <input type="password" class="form-ctrl" id="sms-api-token" placeholder="Enter SMSlenz API Key" value="">
+                            <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('sms-api-token', this)" title="Show/Hide Token">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">SENDER ID MASK <span class="required-star">*</span></label>
+                        <input type="text" class="form-ctrl" id="sms-sender-id" value="" placeholder="e.g. SMART ZONE or Store Name">
+                    </div>
+                </div>
+
+                <!-- Account Status & Balance Card (Matching User Screenshot) -->
+                <div id="smslenz-status-box" style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#059669; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                            <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block;"></span>
+                            SMSlenz Connected Successfully
+                        </span>
+                        <span style="font-size:12px; font-weight:800; color:#0f172a; background:#d1fae5; padding:2px 8px; border-radius:4px;" id="smslenz-balance-badge">
+                            Main Balance: Rs. 1,822.38
+                        </span>
+                    </div>
+                    <div style="font-size:11.5px; color:#065f46; margin-top:4px;">
+                        Live API: <code>https://smslenz.lk/api/send-sms</code> (Type: POST | Auth: <code>user_id</code> & <code>api_key</code>)
+                    </div>
+                </div>
+
+                <!-- Live Preview of SMS message with placeholders replaced -->
+                <div class="sms-preview-card">
+                    <div class="sms-preview-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        LIVE CUSTOMER SMS PREVIEW:
+                    </div>
+                    <div class="sms-preview-bubble" id="sms-live-preview"></div>
+                </div>
+
+                <!-- Test SMS Section inside Modal -->
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-top:14px;">
+                    <div style="font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">📲 Test SMS Gateway Credentials:</div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="sms-test-phone" class="form-ctrl" placeholder="Recipient (07XXXXXXXX)" value="0786800086" style="flex:1;">
+                        <button type="button" class="btn-create-order" style="padding:6px 14px; font-size:12px; width:auto;" onclick="sendTestSmsMessage()">
+                            Send Test SMS
+                        </button>
+                    </div>
+                    <div id="sms-test-status" style="font-size:11.5px; margin-top:4px;"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeSmsSettingsModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal">Save Settings</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 3: 4x6" THERMAL STICKER WAYBILL PRINT
+     ======================================================== -->
+<div id="label-print-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:440px; padding:18px;">
+        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <strong style="font-size:14px;">🖨️ 4x6" Thermal Sticker Preview</strong>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn-create-order" style="padding:6px 14px; font-size:12px;" onclick="window.print()">Print</button>
+                <button type="button" class="btn-cancel" style="padding:6px 10px;" onclick="closeThermalLabelModal()">✕</button>
+            </div>
+        </div>
+
+        <!-- 4x6" Sticker -->
+        <div class="thermal-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:3mm;">
+                <img id="lbl-logo" src="assets/transex-logo.webp" style="max-height:36px; max-width:130px; object-fit:contain;" alt="Courier">
+                <div id="lbl-badge" style="font-size:10px; font-weight:800; border:1.5px solid #000; padding:2px 6px;">DOMESTIC COURIER</div>
+            </div>
+
+            <div style="text-align:center; padding:3mm 0; border-bottom:2px solid #000;">
+                <svg id="lbl-barcode" style="max-width:100%; height:46px;"></svg>
+                <div id="lbl-waybill" style="font-size:18px; font-weight:900; letter-spacing:2px; margin-top:2px;">BE4542289</div>
+            </div>
+
+            <div style="padding:3mm 0; border-bottom:1.5px solid #000; font-size:12px; line-height:1.35;">
+                <div style="font-size:10px; font-weight:800; color:#444;">DELIVER TO:</div>
+                <div id="lbl-rec-name" style="font-size:15px; font-weight:900;">Kasun Rajapaksha</div>
+                <div id="lbl-rec-phone" style="font-size:14px; font-weight:800; margin:2px 0;">📞 0778901234</div>
+                <div id="lbl-rec-address" style="font-size:12px; font-weight:600;">No. 24, Kandy Road, Peradeniya</div>
+                <div id="lbl-rec-city" style="font-size:14px; font-weight:900; text-transform:uppercase; margin-top:2px;">📍 CITY: KANDY</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 85px; gap:8px; align-items:center; padding:3mm 0; border-bottom:2px solid #000;">
+                <div style="background:#000; color:#fff; padding:4px 6px; text-align:center;">
+                    <div style="font-size:9.5px; font-weight:800;">CASH ON DELIVERY (COD)</div>
+                    <div id="lbl-cod-amount" style="font-size:20px; font-weight:900;">Rs. 4,850.00</div>
+                    <div style="font-size:8px; font-weight:700;">COLLECT EXACT CASH</div>
+                </div>
+                <div id="lbl-qrcode" style="display:flex; justify-content:center;"></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:10px; padding-top:2mm;">
+                <div>
+                    <div><strong>Order #:</strong> <span id="lbl-order-id">SZ-10024</span></div>
+                    <div><strong>Weight:</strong> <span id="lbl-weight">1.0 KG</span></div>
+                    <div><strong>Items:</strong> <span id="lbl-desc">Smart Watch</span></div>
+                </div>
+                <div style="border-left:1px solid #777; padding-left:6px;">
+                    <div style="font-size:9px; font-weight:800;">SENDER:</div>
+                    <div><strong>SmartZone LK</strong></div>
+                    <div>Pamidu Mihiranga</div>
+                    <div>0786800086 | Padaviya</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========================================================
+     MODAL 4: ADD / EDIT INVENTORY PRODUCT (CODSEEZ PRODUCTS)
+     ======================================================== -->
+<div id="add-product-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:520px;">
+        <div class="modal-head">
+            <h3 id="modal-product-title">Add Product</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddProductModal()">✕</button>
+        </div>
+        <form id="add-product-form">
+            <input type="hidden" id="modal-product-id-orig" value="">
+            <div class="modal-body">
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">PRODUCT ID / SKU <span class="required-star">*</span></label>
+                        <input type="text" class="form-ctrl" id="modal-prod-id" required placeholder="e.g. PRD-101">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">CATEGORY</label>
+                        <div class="select-wrapper">
+                            <select class="form-ctrl select-styled" id="modal-prod-category">
+                                <option value="Electronics">Electronics</option>
+                                <option value="Audio">Audio</option>
+                                <option value="Watches">Watches</option>
+                                <option value="Accessories">Accessories</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="select-chevron">⌵</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-tag">DESCRIPTION / PRODUCT NAME <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="modal-prod-name" required placeholder="e.g. Smart Watch Series 9">
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">COST PRICE (RS.) <span class="required-star">*</span></label>
+                        <input type="number" class="form-ctrl" id="modal-prod-cost" required placeholder="0" oninput="calcProductModalMargin()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">RETAIL SELLING PRICE (RS.) <span class="required-star">*</span></label>
+                        <input type="number" class="form-ctrl" id="modal-prod-price" required placeholder="0" oninput="calcProductModalMargin()">
+                    </div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">INITIAL STOCK <span class="required-star">*</span></label>
+                        <input type="number" class="form-ctrl" id="modal-prod-stock" value="20" min="0" required>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">WEIGHT (KG)</label>
+                        <input type="number" step="0.05" class="form-ctrl" id="modal-prod-weight" value="0.5">
+                    </div>
+                </div>
+
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 14px; font-size:12.5px; color:#166534; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Estimated Profit Margin:</span>
+                    <strong id="modal-prod-margin-calc">0% (Rs. 0)</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeAddProductModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal" id="btn-save-prod">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 5: ADD PRODUCT ITEM TO ORDER (FROM INVENTORY)
+     ======================================================== -->
+<div id="add-order-item-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px;">
+        <div class="modal-head">
+            <h3>Add Product to Order</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddOrderItemModal()">✕</button>
+        </div>
+        <form id="add-order-item-form">
+            <div class="modal-body">
+                <div class="field-group">
+                    <label class="field-tag">SELECT PRODUCT FROM INVENTORY</label>
+                    <div class="select-wrapper">
+                        <select class="form-ctrl select-styled" id="order-item-prod-select" onchange="handleOrderItemProductSelect()">
+                            <!-- Populated with ProductsStorage.getAll() -->
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-tag">PRODUCT NAME / DESCRIPTION <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="order-item-name" required placeholder="Product title">
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">UNIT PRICE (RS.) <span class="required-star">*</span></label>
+                        <input type="number" class="form-ctrl" id="order-item-price" required placeholder="0">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">QUANTITY <span class="required-star">*</span></label>
+                        <input type="number" class="form-ctrl" id="order-item-qty" value="1" min="1" required>
+                    </div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">WEIGHT PER UNIT (KG)</label>
+                        <input type="number" step="0.05" class="form-ctrl" id="order-item-weight" value="0.5">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">AVAILABLE STOCK</label>
+                        <div style="font-size:13px; font-weight:700; color:#166534; padding:9px 0;" id="order-item-stock-info">
+                            Select product
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeAddOrderItemModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal">+ Add to Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 8: DISPATCH ORDER TO COURIER (TRANS EXPRESS & FARDAR)
+     ======================================================== -->
+<div id="dispatch-courier-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:520px;">
+        <div class="modal-head">
+            <h3>🚀 Dispatch Order to Courier</h3>
+            <button type="button" class="modal-close-btn" onclick="closeDispatchCourierModal()">✕</button>
+        </div>
+        <form id="dispatch-courier-form">
+            <input type="hidden" id="disp-order-id" value="">
+            <div class="modal-body">
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-size:12px; color:#0369a1; font-weight:700;">ORDER DETAILS:</span>
+                        <strong style="font-size:13px; font-family:'JetBrains Mono'; color:#0369a1;" id="disp-order-num">SZ-00000</strong>
+                    </div>
+                    <div style="font-size:13px; font-weight:700; color:#0f172a;" id="disp-customer-info">Kasun Rajapaksha (0778901234)</div>
+                    <div style="font-size:12px; color:#475569;" id="disp-address-info">No 24, Kandy Road, Peradeniya | City: Kandy</div>
+                    <div style="font-size:13px; color:#15803d; font-weight:800; margin-top:4px;">
+                        COD Payable Amount: <span id="disp-cod-info">Rs. 4,850.00</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-tag">SELECT COURIER DELIVERY SERVICE <span class="required-star">*</span></label>
+                    <div class="select-wrapper">
+                        <select class="form-ctrl select-styled" id="disp-service-select" onchange="handleDispatchCourierSelectChange()">
+                            <!-- Populated with Trans Express (Client ID 4792) and Fardar Express (Client ID 5980) -->
+                        </select>
+                        <span class="select-chevron">⌵</span>
+                    </div>
+                    <div style="font-size:11.5px; color:#0284c7; margin-top:4px;" id="disp-courier-hint">
+                        Trans Express Islandwide (Client ID: 4792)
+                    </div>
+                </div>
+
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">PARCEL WEIGHT (KG) <span class="required-star">*</span></label>
+                        <input type="number" step="0.05" class="form-ctrl" id="disp-weight" value="0.5" required>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">PARCEL DESCRIPTION</label>
+                        <input type="text" class="form-ctrl" id="disp-description" value="Package Items">
+                    </div>
+                </div>
+
+                <!-- Waybill Generation / Assignment Mode (Matches New Waybill API.txt and Existing Waybill API.txt) -->
+                <div class="field-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label class="field-tag" style="margin:0;">COURIER WAYBILL / TRACKING NUMBER <span class="required-star">*</span></label>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" class="btn-cancel" style="font-size:10.5px; font-weight:700; padding:2px 8px; color:#e11d48; border:1px solid #fecdd3; background:#fff1f2;" onclick="setDispatchWaybillMode('api')" title="Generate New Waybill via API (Matches New Waybill API.txt)">
+                                ⚡ New API Waybill
+                            </button>
+                            <button type="button" class="btn-cancel" style="font-size:10.5px; font-weight:700; padding:2px 8px; color:#ea580c; border:1px solid #fed7aa; background:#fff7ed;" onclick="setDispatchWaybillMode('existing')" title="Use Pre-Printed Sticker / Client Code (Matches Existing Waybill API.txt)">
+                                📑 Existing Sticker
+                            </button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" class="form-ctrl" id="disp-waybill-input" placeholder="e.g. API5173879 or IND1302013 or BE4542289" style="font-family:'JetBrains Mono'; font-weight:800; font-size:13.5px; letter-spacing:0.5px;">
+                        <button type="button" class="btn-cancel" style="font-size:11.5px; font-weight:700; white-space:nowrap; padding:0 12px; color:#0284c7; border:1px solid #bae6fd; background:#f0f9ff;" onclick="autoGenerateDispatchWaybill(true)">
+                            ⚡ Auto-Generate
+                        </button>
+                    </div>
+                    <div style="font-size:11px; color:#64748b; margin-top:4px;" id="disp-waybill-hint">
+                        Fardar API: <code>API51XXXXX</code> | Fardar Existing: <code>IND13XXXXX</code> | Trans Express: <code>BE45XXXXX</code>
+                    </div>
+                </div>
+
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 14px; font-size:12px; color:#166534; display:flex; align-items:center; gap:8px;">
+                    <span>📱</span>
+                    <span><strong>Automated Customer SMS:</strong> Customer will receive instant SMS with courier tracking link via SMSLENZ gateway upon confirmation.</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeDispatchCourierModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal" style="background:#0284c7;">
+                    🚀 Confirm & Dispatch to Courier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 6: SUBSCRIPTION PAYMENT & ACTIVATION (PAY TO RENEW)
+     ======================================================== -->
+<div id="subscription-payment-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:550px;">
+        <div class="modal-head">
+            <h3>💳 Activate Merchant Subscription</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSubscriptionPaymentModal()">✕</button>
+        </div>
+        <form id="subscription-payment-form">
+            <div class="modal-body">
+                <p style="font-size:12.5px; color:#64748b; margin-bottom:16px;">
+                    Select your subscription plan and upload your bank deposit slip or activate instantly:
+                </p>
+
+                <!-- 3 Plans Grid -->
+                <div class="plan-selector-grid">
+                    <div class="plan-card active" onclick="selectPlan('Monthly', 2500, this)">
+                        <div class="plan-title">Monthly</div>
+                        <div class="plan-price">Rs. 2,500</div>
+                        <div class="plan-cycle">per month</div>
+                    </div>
+                    <div class="plan-card" onclick="selectPlan('6 Months', 12000, this)">
+                        <span class="plan-badge-popular">POPULAR</span>
+                        <div class="plan-title">6 Months</div>
+                        <div class="plan-price">Rs. 12,000</div>
+                        <div class="plan-cycle">Rs. 2,000 / mo</div>
+                    </div>
+                    <div class="plan-card" onclick="selectPlan('1 Year Pro', 22000, this)">
+                        <div class="plan-title">1 Year Pro</div>
+                        <div class="plan-price">Rs. 22,000</div>
+                        <div class="plan-cycle">Best Value</div>
+                    </div>
+                </div>
+                <input type="hidden" id="sub-selected-plan" value="Monthly">
+                <input type="hidden" id="sub-selected-amount" value="2500">
+
+                <!-- Bank Account Details Card -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <div style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+                        🏦 Direct Bank Deposit Details:
+                    </div>
+                    <div style="font-size:13px; font-weight:700; color:#0f172a;">Commercial Bank of Ceylon</div>
+                    <div style="font-size:12.5px; color:#334155; margin-top:2px;">Account Name: <strong>SmartZone Solutions LK</strong></div>
+                    <div style="font-size:14px; font-family:'JetBrains Mono'; font-weight:800; color:#2563eb; margin:3px 0;">Account #: 8010049281</div>
+                    <div style="font-size:12px; color:#64748b;">Branch: Padaviya Branch</div>
+                </div>
+
+                <!-- Reference / Slip input -->
+                <div class="field-group">
+                    <label class="field-tag">BANK DEPOSIT REFERENCE / SLIP NOTE <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="sub-bank-ref" placeholder="Enter bank reference or deposit slip number" required>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-tag">ATTACH PAYMENT RECEIPT / SLIP (IMAGE)</label>
+                    <input type="file" class="form-ctrl" id="sub-bank-slip-file" accept="image/*,.pdf">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px; margin-top:10px;">
+                    <div>
+                        <div style="font-size:11px; font-weight:700; color:#1e40af;">SELECTED PLAN TOTAL:</div>
+                        <div id="sub-display-total" style="font-size:18px; font-weight:900; color:#1d4ed8;">Rs. 2,500.00</div>
+                    </div>
+                    <button type="button" class="btn-activate-subscription" onclick="simulateInstantCardPayment()" style="background:#2563eb;">
+                        ⚡ Instant Card Test Activation
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeSubscriptionPaymentModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal">Submit Bank Slip</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL 7: ADD MERCHANT / STORE (ADMIN CONTROL)
+     ======================================================== -->
+<div id="add-merchant-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px;">
+        <div class="modal-head">
+            <h3>Add New Merchant / Store</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAddMerchantModal()">✕</button>
+        </div>
+        <form id="add-merchant-form">
+            <div class="modal-body">
+                <div class="field-group">
+                    <label class="field-tag">MERCHANT FULL NAME <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="adm-user-name" required placeholder="Owner name">
+                </div>
+                <div class="field-group">
+                    <label class="field-tag">STORE / BRAND NAME <span class="required-star">*</span></label>
+                    <input type="text" class="form-ctrl" id="adm-user-store" required placeholder="Store name">
+                </div>
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">PHONE <span class="required-star">*</span></label>
+                        <input type="text" class="form-ctrl" id="adm-user-phone" required placeholder="07XXXXXXXX">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">EMAIL <span class="required-star">*</span></label>
+                        <input type="email" class="form-ctrl" id="adm-user-email" required placeholder="owner@gmail.com">
+                    </div>
+                </div>
+                <div class="row-2col">
+                    <div class="field-group">
+                        <label class="field-tag">PASSWORD <span class="required-star">*</span></label>
+                        <input type="password" class="form-ctrl" id="adm-user-pass" required value="merchant123">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-tag">INITIAL STATUS</label>
+                        <select class="form-ctrl select-styled" id="adm-user-status">
+                            <option value="trial" selected>10-Day Free Trial</option>
+                            <option value="active">Active (Paid Pro)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeAddMerchantModal()">Cancel</button>
+                <button type="submit" class="btn-submit-modal">Create Merchant</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================
+     AUTHENTICATION & LOGIN PORTAL (10-DAY TRIAL & ADMIN)
+     ======================================================== -->
+<div id="auth-portal-overlay" class="auth-portal-overlay">
+    <div class="auth-portal-card">
+        <div class="auth-brand-head">
+            <div class="auth-logo-badge">⚡</div>
+            <h2 class="auth-title">Codseez OMS</h2>
+            <p class="auth-subtitle">Sri Lankan E-Commerce Operations & Order Management</p>
+        </div>
+
+        <!-- 3 Auth Tabs -->
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab-btn active" id="tab-btn-login" onclick="switchAuthTab('login')">
+                Sign In
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-btn-register" onclick="switchAuthTab('register')">
+                ✨ 10-Day Free Demo
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-btn-admin" onclick="switchAuthTab('admin')">
+                🛡️ Admin
+            </button>
+        </div>
+
+        <!-- Tab 1: Merchant / User Login -->
+        <form id="auth-login-form">
+            <div class="auth-form-group">
+                <label class="auth-form-label">EMAIL OR MOBILE NUMBER</label>
+                <input type="text" class="auth-input" id="login-email" placeholder="e.g. demo@gmail.com or 07XXXXXXXX" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">PASSWORD</label>
+                <input type="password" class="auth-input" id="login-password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn-auth-submit">
+                Sign In to Dashboard
+            </button>
+        </form>
+
+        <!-- Tab 2: 10-Day Free Demo Registration -->
+        <form id="auth-register-form" style="display:none;">
+            <div class="auth-form-group">
+                <label class="auth-form-label">YOUR FULL NAME</label>
+                <input type="text" class="auth-input" id="reg-name" placeholder="e.g. Kasun Mihiranga" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">STORE / BRAND NAME</label>
+                <input type="text" class="auth-input" id="reg-store" placeholder="e.g. SmartZone LK" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">MOBILE NUMBER (07XXXXXXXX)</label>
+                <input type="text" class="auth-input" id="reg-phone" placeholder="07XXXXXXXX" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">EMAIL ADDRESS</label>
+                <input type="email" class="auth-input" id="reg-email" placeholder="store@example.com" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">CREATE PASSWORD</label>
+                <input type="password" class="auth-input" id="reg-password" placeholder="Choose a secure password" required>
+            </div>
+            <button type="submit" class="btn-auth-submit" style="background:linear-gradient(135deg, #10b981, #059669);">
+                🚀 Register & Start 10-Day Free Trial
+            </button>
+            <div style="font-size:11px; color:#94a3b8; text-align:center; margin-top:8px;">
+                ✨ Full 10 days free access to Orders, Courier waybills & SMS. No card required.
+            </div>
+        </form>
+
+        <!-- Tab 3: Super Admin Login -->
+        <form id="auth-admin-form" style="display:none;">
+            <div class="auth-form-group">
+                <label class="auth-form-label">ADMIN EMAIL</label>
+                <input type="email" class="auth-input" id="admin-email" value="admin@smartzone.lk" required>
+            </div>
+            <div class="auth-form-group">
+                <label class="auth-form-label">ADMIN PASSWORD</label>
+                <input type="password" class="auth-input" id="admin-password" value="admin123" required>
+            </div>
+            <button type="submit" class="btn-auth-submit" style="background:linear-gradient(135deg, #7e22ce, #6b21a8);">
+                🛡️ Enter Super Admin Console
+            </button>
+        </form>
+
+        <!-- Quick 1-Click Test Credentials Buttons -->
+        <div class="auth-quick-creds">
+            <div class="auth-quick-title">⚡ Quick 1-Click Test Accounts:</div>
+            <div class="auth-quick-buttons">
+                <button type="button" class="btn-quick-cred" onclick="quickFillLogin('demo@gmail.com', 'demo123')">
+                    👤 Active Trial (8 Days)
+                </button>
+                <button type="button" class="btn-quick-cred" onclick="quickFillLogin('expired@gmail.com', 'expired123')">
+                    ⛔ Expired Trial (Blocked)
+                </button>
+                <button type="button" class="btn-quick-cred" onclick="quickFillLogin('admin@smartzone.lk', 'admin123')">
+                    👑 Super Admin
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Custom JavaScript Engine -->
+<script src="js/oms.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+Reverse API Doc
+
+YOUR API TEST IN HERE
+We are providing the status of the last parcel for testing purposes
+Your Endpoint URL
+* Please ensure that your endpoint is updated during this testing process.
+ENDPOINT URL
+If your testing process is successful, you can set the endpoint URL
+Endpoint URL
+https://smartzonelk.lk/api/fardar_webhook.php
+RESPONSE PARAMETERS
+Key	Description
+waybill_id	Waybill ID / Tracking ID
+current_status	Currnet delivery status of your parcel
+last_update_time	Last updated date & time of your parcel
+SAMPLE PHP CODE
+<?php
+// Whitelist Our Domain
+Access-Control-Allow-Origin: https://www.fdedomestic.com/client
+
+// Call Back Parameters
+$waybill_id = $_POST["waybill_id"]; // Your Waybill
+$delivery_status = $_POST["delivery_status"]; // Current Status
+$last_update_time = $_POST["last_update_time"]; // API Callback Time and Date
+
+// Code To Update your Database
+?>

@@ -1,0 +1,129 @@
+Existing Waybill API Doc
+
+YOUR API INFORMATION
+Client ID
+5980
+API Key
+2c25c0244f8d688eb9ff
+Status
+Active
+PICKUP REQUEST
+You can use this endpoint directly for pickup request.
+
+ENDPOINT	https://www.fdedomestic.com/api/parcel/existing_waybill_api_v1.php
+TYPE	POST
+RETURN TYPE	JSON
+Key	Value	Required
+client_id	Your Fardar Express Domestic (PVT) LTD Client ID.	YES
+api_key	Your Fardar Express Domestic (PVT) LTD API key.	YES
+waybill_id	The Tracking Number of Assigned.	YES
+order_id	The Order ID (Invoice ID/ Reference No) of the Parcel.	NO
+parcel_weight	The Weight of the Parcel.	YES
+parcel_description	The Description of the Parcel.	YES
+recipient_name	The Name of the Recipient.	YES
+recipient_contact_1	The Number of the Recipient.	YES
+recipient_contact_2	The Number of the Recipient.	NO
+recipient_address	The Address of the Recipient.	YES
+recipient_city	The City of the Recipient.	YES
+amount	The Amount of the parcel.	YES
+exchange	The Exchange Status of the Parcel. (1 - Exchange Parcel / 0 - Normal Parcel)	YES
+RESPONSE SAMPLE
+{
+"status": 200,
+"waybill_no": "10000001"
+}
+
+RESPONSE PARAMETERS
+Key	Description
+status	Your Status Code
+waybill_no	Existing Waybill ID is Passed
+STATUS CODE LIST
+Status Code	Status Message
+200	Successfully insert the parcel
+201	Incorrect waybill type. Only allow CRE or CCP
+202	The waybill is used
+203	The waybill is not yet assigned
+204	Inactive Client
+205	Invalid order id
+206	Invalid weight
+207	Empty or invalid parcel description
+208	Empty or invalid name
+209	Invalid contact number 1
+210	Invalid contact number 2
+211	Empty or invalid address
+212	Empty or invalid amount (If you have CRE numbers, you can ignore or set as a 0 value to this)
+213	Invalid city
+214	Parcel insert unsuccessfully
+215	Invalid or inactive client
+216	Invalid API key
+217	Invalid exchange value
+218	System maintain mode is activated
+SAMPLE PHP CODE
+                                                
+                                                    <?php
+
+                                                    function makeCurlRequest($url, $postData) {
+                                                        // Set the cURL options
+                                                        $curlOptions = array(
+                                                            CURLOPT_URL => $url,
+                                                            CURLOPT_RETURNTRANSFER => true,
+                                                            CURLOPT_POST => true,
+                                                            CURLOPT_POSTFIELDS => $postData,
+                                                        );
+
+                                                        // Initialize cURL session
+                                                        $ch = curl_init();
+                                                        curl_setopt_array($ch, $curlOptions);
+
+                                                        // Execute cURL session and get the response
+                                                        $response = curl_exec($ch);
+
+                                                        // Check for cURL errors
+                                                        if (curl_errno($ch)) {
+                                                            $response = 'Curl error: ' . curl_error($ch);
+                                                        }
+
+                                                        // Close cURL session
+                                                        curl_close($ch);
+
+                                                        return $response;
+                                                    }
+
+                                                    // Set the API endpoint URL
+                                                    $apiEndpoint = "https://www.fdedomestic.com/api/parcel/existing_waybill_api_v1.php";
+
+                                                    // Set the data for POST request
+                                                    $postData = array(
+                                                        'api_key' => 'apkx1000pykx', 
+                                                        'client_id' => '1000', 
+                                                        'waybill_id' => '1041',
+                                                        'order_id' => '124578',
+                                                        'parcel_weight' => '3',
+                                                        'parcel_description' => 'api sample',
+                                                        'recipient_name' => 'Sudeshi Perera',
+                                                        'recipient_contact_1' => '',
+                                                        'recipient_contact_2' => '',
+                                                        'recipient_address' => '1st lane, Samudu Road',
+                                                        'recipient_city' => 'Matara',
+                                                        'amount' => '1500',
+                                                        'exchange' => '0',
+                                                    );
+
+                                                    // Make the cURL request using the function
+                                                    $response = makeCurlRequest($apiEndpoint, $postData);
+
+                                                    // Output the response
+                                                    echo $response;
+
+                                                    ?>
+                                                 
+                                                Copy Code
+                                            
+Important Notes
+Form Data Only: All requests must be made using form data. Query strings or JSON payloads are not accepted.
+
+API Key and Client ID: Ensure your api_key and client_id are correctly provided for authentication.
+
+Validation: Validate all input data to match the required formats and constraints.
+
+*For any additional questions or support, please contact our technical team.

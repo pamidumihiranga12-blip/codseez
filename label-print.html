@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4x6" Shipping Label Sticker - SmartZone OMS</title>
+    <!-- JsBarcode & QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0b1329;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 12px;
+            color: #000;
+        }
+
+        .top-action-bar {
+            width: 100%;
+            max-width: 100mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e293b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: #475569;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* 4x6" Thermal Sheet */
+        .thermal-sheet {
+            width: 100mm;
+            min-height: 150mm;
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #000000;
+            padding: 5mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .th-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 3mm;
+        }
+
+        .th-logo img {
+            max-height: 38px;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        .th-badge {
+            font-size: 11px;
+            font-weight: 800;
+            border: 1.5px solid #000;
+            padding: 2px 6px;
+            text-transform: uppercase;
+        }
+
+        .th-barcode-box {
+            text-align: center;
+            padding: 3mm 0;
+            border-bottom: 2px solid #000;
+        }
+
+        .th-barcode-svg {
+            max-width: 100%;
+            height: 48px;
+        }
+
+        .th-tracking-text {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .th-section {
+            padding: 3mm 0;
+            border-bottom: 1.5px solid #000;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .th-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #444;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .th-rec-name {
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .th-rec-phone {
+            font-size: 14px;
+            font-weight: 800;
+            margin: 2px 0;
+        }
+
+        .th-rec-address {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .th-rec-city {
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .th-cod-row {
+            display: grid;
+            grid-template-columns: 1fr 85px;
+            gap: 8px;
+            align-items: center;
+            padding: 3mm 0;
+            border-bottom: 2px solid #000;
+        }
+
+        .th-cod-box {
+            border: 2px solid #000;
+            padding: 4px 6px;
+            text-align: center;
+        }
+
+        .th-cod-box.active {
+            background: #000;
+            color: #fff;
+        }
+
+        .th-cod-amount {
+            font-size: 20px;
+            font-weight: 900;
+            margin: 2px 0;
+        }
+
+        .th-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 10px;
+            padding-top: 2mm;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+                margin: 0;
+            }
+            .top-action-bar {
+                display: none !important;
+            }
+            .thermal-sheet {
+                border: 2px solid #000;
+                box-shadow: none;
+                width: 100mm;
+                height: 150mm;
+                margin: 0;
+                page-break-after: always;
+            }
+            @page {
+                size: 100mm 150mm;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-action-bar">
+        <a href="index.html" class="btn-back">← Back to OMS</a>
+        <button class="btn-print" onclick="window.print()">🖨️ Print 4x6" Label</button>
+    </div>
+
+    <div class="thermal-sheet">
+        <div class="th-header">
+            <div class="th-logo">
+                <img id="label-logo" src="assets/fed-logo.webp" alt="Courier Logo">
+            </div>
+            <div id="label-service" class="th-badge">DOMESTIC COURIER</div>
+        </div>
+
+        <div class="th-barcode-box">
+            <svg id="barcode" class="th-barcode-svg"></svg>
+            <div id="label-waybill" class="th-tracking-text">IND1114920</div>
+        </div>
+
+        <div class="th-section">
+            <div class="th-title">SHIP TO (RECIPIENT):</div>
+            <div id="label-name" class="th-rec-name">Kasun Rajapaksha</div>
+            <div id="label-phone" class="th-rec-phone">📞 0778901234</div>
+            <div id="label-address" class="th-rec-address">No. 24, Kandy Road, Peradeniya</div>
+            <div id="label-city" class="th-rec-city">📍 CITY: KANDY</div>
+        </div>
+
+        <div class="th-cod-row">
+            <div id="label-cod-box" class="th-cod-box active">
+                <div style="font-size:9.5px; font-weight:800; text-transform:uppercase;">CASH ON DELIVERY (COD)</div>
+                <div id="label-cod" class="th-cod-amount">Rs. 4,850.00</div>
+                <div style="font-size:8.5px; font-weight:700;">COLLECT EXACT CASH UPON DELIVERY</div>
+            </div>
+            <div id="qrcode" style="display:flex; justify-content:center;"></div>
+        </div>
+
+        <div class="th-meta-grid">
+            <div>
+                <div><strong>Order #:</strong> <span id="label-ref">SZ-90412</span></div>
+                <div><strong>Weight:</strong> <span id="label-weight">1.0 KG</span></div>
+                <div><strong>Desc:</strong> <span id="label-desc">Smart Watch</span></div>
+            </div>
+            <div style="border-left:1px solid #777; padding-left:6px;">
+                <div class="th-title">SENDER:</div>
+                <div><strong>SmartZone LK</strong></div>
+                <div>Pamidu Mihiranga</div>
+                <div>0786800086 | Padaviya</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const waybill = params.get('waybill') || 'IND111' + Math.floor(1000 + Math.random() * 9000);
+        const courier = (params.get('courier') || (waybill.startsWith('BE') ? 'trans_express' : 'fardar')).toLowerCase();
+        const isFardar = (courier === 'fardar' || waybill.startsWith('IND') || waybill.startsWith('CRE'));
+
+        document.getElementById('label-logo').src = isFardar ? 'assets/fed-logo.webp' : 'assets/transex-logo.webp';
+        document.getElementById('label-service').textContent = isFardar ? 'FED DOMESTIC COURIER' : 'TRANS EXPRESS COURIER';
+        document.getElementById('label-waybill').textContent = waybill;
+        document.getElementById('label-name').textContent = params.get('name') || 'Customer Name';
+        document.getElementById('label-phone').textContent = '📞 ' + (params.get('phone') || '07XXXXXXXX') + (params.get('phone2') ? ' / ' + params.get('phone2') : '');
+        document.getElementById('label-address').textContent = params.get('address') || 'Delivery Address, Sri Lanka';
+        document.getElementById('label-city').textContent = '📍 CITY: ' + (params.get('city') || 'COLOMBO').toUpperCase();
+
+        const cod = parseFloat(params.get('cod') || 0);
+        document.getElementById('label-cod').textContent = `Rs. ${cod.toFixed(2)}`;
+        if (cod <= 0) {
+            document.getElementById('label-cod-box').classList.remove('active');
+            document.getElementById('label-cod-box').innerHTML = `
+                <div style="font-size:9.5px; font-weight:800; text-transform:uppercase;">PREPAID ORDER</div>
+                <div style="font-size:16px; font-weight:900; margin:2px 0;">Rs. 0.00</div>
+                <div style="font-size:8.5px; font-weight:700;">DO NOT COLLECT CASH</div>
+            `;
+        }
+
+        document.getElementById('label-ref').textContent = params.get('ref') || 'SZ-' + Math.floor(10000 + Math.random() * 90000);
+        document.getElementById('label-weight').textContent = (params.get('weight') || '1.0') + ' KG';
+        document.getElementById('label-desc').textContent = params.get('desc') || 'SmartZone Goods';
+
+        // Render Barcode
+        JsBarcode("#barcode", waybill, {
+            format: "CODE128",
+            lineColor: "#000",
+            width: 2.2,
+            height: 48,
+            displayValue: false
+        });
+
+        // Render QR Code
+        const trackUrl = isFardar 
+            ? `https://www.fdedomestic.com/track.php?track_number=${waybill}`
+            : `https://domestic.transexpress.lk/order-tracking?waybill_id=${waybill}`;
+        new QRCode(document.getElementById("qrcode"), {
+            text: trackUrl,
+            width: 80,
+            height: 80,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.M
+        });
+
+        if (params.get('autoprint') === '1') {
+            setTimeout(() => window.print(), 600);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store | Islandwide Delivery Sri Lanka</title>
+    <meta name="description" content="Shop the latest products with Islandwide Cash on Delivery (COD) across Sri Lanka. Fast delivery via Trans Express and Fardar Express.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-green: #10b981;
+            --dark-navy: #0b1329;
+            --slate-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--slate-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Announcement Bar */
+        .top-announcement {
+            background: linear-gradient(90deg, #1e293b, #0b1329);
+            color: #f1f5f9;
+            font-size: 12.5px;
+            padding: 7px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-announcement span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Main Header */
+        .store-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .store-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .store-logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .store-name-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .store-verified-pill {
+            font-size: 10.5px;
+            font-weight: 700;
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            padding: 2px 7px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-track-header {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-track-header:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .btn-cart-header {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            position: relative;
+            transition: all 0.15s ease;
+        }
+
+        .btn-cart-header:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .cart-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+
+        /* Hero Banner */
+        .store-hero {
+            background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%);
+            color: #fff;
+            padding: 36px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .store-hero::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 140%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 18px;
+            line-height: 1.5;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero-pill {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Main Store Content */
+        .store-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Toolbar: Search & Categories */
+        .catalog-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .category-filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cat-tab {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .cat-tab.active, .cat-tab:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .catalog-search-box {
+            position: relative;
+            min-width: 260px;
+        }
+
+        .catalog-search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+        }
+
+        .catalog-search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .search-icon-pos {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+
+        .product-visual-wrap {
+            height: 160px;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .product-placeholder-icon {
+            font-size: 54px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .product-stock-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(16, 185, 129, 0.9);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .product-stock-tag.out {
+            background: rgba(239, 68, 68, 0.9);
+        }
+
+        .product-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-category-text {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #0284c7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .product-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .product-sku-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-bottom: 12px;
+        }
+
+        .product-price-row {
+            margin-top: auto;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .product-price-num {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .product-unit-weight {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .product-actions-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-add-cart {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-add-cart:hover {
+            background: #dbeafe;
+        }
+
+        .btn-buy-now {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-buy-now:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Cart Drawer (Side Modal) */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            justify-content: flex-end;
+        }
+
+        .cart-overlay.open {
+            display: flex;
+        }
+
+        .cart-drawer {
+            background: #fff;
+            width: 100%;
+            max-width: 440px;
+            height: 100%;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .cart-head {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-head h3 {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .btn-close-cart {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .cart-items-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .cart-item-row {
+            display: flex;
+            gap: 12px;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .cart-qty-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .btn-qty {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: #f8fafc;
+        }
+
+        .cart-summary-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .cart-summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        .btn-proceed-checkout {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 13px;
+            border-radius: 9px;
+            font-size: 14.5px;
+            font-weight: 800;
+            margin-top: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-proceed-checkout:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        }
+
+        /* Checkout Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #fff;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-head {
+            padding: 18px 22px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-head h3 {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 20px 22px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13.5px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .order-cod-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12.5px;
+            color: #1e40af;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-confirm-order {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 13px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+            transition: all 0.15s ease;
+        }
+
+        .btn-confirm-order:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Order Success Receipt Modal */
+        .success-receipt {
+            text-align: center;
+            padding: 28px 22px;
+        }
+
+        .success-icon-badge {
+            width: 64px;
+            height: 64px;
+            background: #dcfce7;
+            color: #15803d;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 14px;
+        }
+
+        /* Customer Tracking Modal */
+        .track-stepper-view {
+            padding: 16px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero-title { font-size: 24px; }
+            .catalog-toolbar { flex-direction: column; align-items: stretch; }
+            .catalog-search-box { min-width: 100%; }
+            .row-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Info Bar -->
+    <div class="top-announcement">
+        <span>🚚 <strong>Islandwide Delivery:</strong> Fast Cash on Delivery across Sri Lanka via Trans Express & Fardar Express</span>
+        <span>📞 WhatsApp: <strong>0786800086</strong></span>
+    </div>
+
+    <!-- Store Header -->
+    <header class="store-header">
+        <div class="header-container">
+            <a href="store.html" class="store-brand">
+                <div class="store-logo-icon">⚡</div>
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <h1 class="store-name-title" id="store-title-text">SmartZone LK</h1>
+                        <span class="store-verified-pill">✓ Verified Merchant</span>
+                    </div>
+                    <div style="font-size:11.5px; color:#64748b;">Official Codseez OMS Customer Storefront</div>
+                </div>
+            </a>
+
+            <div class="header-actions">
+                <button type="button" class="btn-track-header" onclick="openStoreTrackingModal()">
+                    🔍 Track My Order
+                </button>
+                <button type="button" class="btn-cart-header" onclick="openCartDrawer()">
+                    🛒 Cart <span class="cart-badge" id="header-cart-count">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="store-hero">
+        <h2 class="hero-title">Browse & Order Quality Products</h2>
+        <p class="hero-subtitle">
+            Order online in 30 seconds with Cash on Delivery (COD). You will receive an instant SMS with live courier tracking upon dispatch!
+        </p>
+        <div class="hero-badges">
+            <span class="hero-pill">💵 Cash On Delivery (COD)</span>
+            <span class="hero-pill">🚚 1-3 Days Islandwide</span>
+            <span class="hero-pill">📦 Genuine Products</span>
+            <span class="hero-pill">📱 Real-Time SMS Updates</span>
+        </div>
+    </section>
+
+    <!-- Main Catalog Container -->
+    <main class="store-container">
+        <!-- Toolbar: Category filter tabs & Search -->
+        <div class="catalog-toolbar">
+            <div class="category-filter-tabs" id="category-tabs-container">
+                <button class="cat-tab active" onclick="filterCatalog('All', this)">All Products</button>
+                <button class="cat-tab" onclick="filterCatalog('Electronics', this)">Electronics</button>
+                <button class="cat-tab" onclick="filterCatalog('Audio', this)">Audio</button>
+                <button class="cat-tab" onclick="filterCatalog('Watches', this)">Watches</button>
+                <button class="cat-tab" onclick="filterCatalog('Accessories', this)">Accessories</button>
+            </div>
+
+            <div class="catalog-search-box">
+                <span class="search-icon-pos">🔍</span>
+                <input type="text" id="catalog-search-input" placeholder="Search products..." oninput="handleCatalogSearch(this.value)">
+            </div>
+        </div>
+
+        <!-- Products Grid Container -->
+        <div class="products-grid" id="store-products-grid">
+            <!-- Dynamically populated from ProductsStorage -->
+        </div>
+    </main>
+
+    <!-- ========================================================
+         CART DRAWER (SIDE MODAL)
+         ======================================================== -->
+    <div id="cart-drawer-overlay" class="cart-overlay" onclick="handleCartOverlayClick(event)">
+        <div class="cart-drawer">
+            <div class="cart-head">
+                <h3>🛍️ Shopping Cart (<span id="cart-drawer-items-count">0</span>)</h3>
+                <button type="button" class="btn-close-cart" onclick="closeCartDrawer()">✕</button>
+            </div>
+
+            <div class="cart-items-body" id="cart-items-container">
+                <!-- Dynamically rendered cart rows -->
+            </div>
+
+            <div class="cart-footer">
+                <div class="cart-summary-line">
+                    <span>Items Subtotal:</span>
+                    <strong id="cart-summary-subtotal">Rs. 0</strong>
+                </div>
+                <div class="cart-summary-line">
+                    <span>Islandwide Courier Delivery:</span>
+                    <strong id="cart-summary-delivery">Rs. 500</strong>
+                </div>
+                <div class="cart-summary-total">
+                    <span>Total Amount (COD):</span>
+                    <span id="cart-summary-grand-total">Rs. 500</span>
+                </div>
+
+                <button type="button" class="btn-proceed-checkout" onclick="openCheckoutModal()">
+                    🚀 Proceed to Checkout (COD)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         CHECKOUT MODAL (ONE-PAGE FAST CHECKOUT)
+         ======================================================== -->
+    <div id="checkout-modal-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>📦 Fast Checkout & Delivery Details</h3>
+                <button type="button" class="btn-close-cart" onclick="closeCheckoutModal()">✕</button>
+            </div>
+
+            <form id="store-checkout-form" onsubmit="handleCustomerCheckoutSubmit(event)">
+                <div class="modal-body">
+                    <div class="order-cod-notice">
+                        <span>💵</span>
+                        <span><strong>Cash on Delivery (COD):</strong> Pay cash when courier delivers the package to your doorstep.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">YOUR FULL NAME <span style="color:#ef4444;">*</span></label>
+                        <input type="text" class="form-input" id="cust-name" required placeholder="e.g. Kasun Rajapaksha">
+                    </div>
+
+                    <div class="row-2">
+                        <div class="form-group">
+                            <label class="form-label">MOBILE PHONE NUMBER <span style="color:#ef4444;">*</span></label>
+                            <input type="tel" class="form-input" id="cust-phone" required placeholder="07XXXXXXXX" pattern="0[0-9]{9}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">WHATSAPP / PHONE 2 (OPTIONAL)</label>
+                            <input type="tel" class="form-input" id="cust-phone2" placeholder="07XXXXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">STREET DELIVERY ADDRESS <span style="color:#ef4444;">*</span></label>
+                        <input type="text" class="form-input" id="cust-address" required placeholder="House #, Street / Road Name">
+                    </div>
+
+                    <div class="row-2">
+                        <div class="form-group">
+                            <label class="form-label">CITY / TOWN <span style="color:#ef4444;">*</span></label>
+                            <input type="text" class="form-input" id="cust-city" required placeholder="e.g. Kandy, Colombo, Galle">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PAYMENT METHOD</label>
+                            <select class="form-input" id="cust-payment-method">
+                                <option value="Cash on Delivery (COD)" selected>Cash on Delivery (COD)</option>
+                                <option value="Direct Bank Transfer">Direct Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">DELIVERY NOTES / LANDMARKS</label>
+                        <input type="text" class="form-input" id="cust-notes" placeholder="Near temple, blue gate, etc.">
+                    </div>
+
+                    <!-- Order Summary Box -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-top:8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#64748b; margin-bottom:4px;">
+                            <span>Order Items (<span id="chk-item-count">0</span>):</span>
+                            <span id="chk-items-total">Rs. 0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#64748b; margin-bottom:6px;">
+                            <span>Courier Delivery Charge:</span>
+                            <span>Rs. 500</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900; color:#1e3a8a; border-top:1px solid #cbd5e1; padding-top:6px;">
+                            <span>Total Payable:</span>
+                            <span id="chk-grand-total">Rs. 500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding:16px 22px; border-top:1px solid var(--border-color); background:#fff;">
+                    <button type="submit" class="btn-confirm-order">
+                        🚀 Confirm & Place Order (Cash on Delivery)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         ORDER SUCCESS RECEIPT MODAL
+         ======================================================== -->
+    <div id="order-success-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width:480px;">
+            <div class="modal-body success-receipt">
+                <div class="success-icon-badge">✓</div>
+                <h3 style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:6px;">Order Placed Successfully!</h3>
+                <p style="font-size:13.5px; color:#64748b; margin-bottom:18px;">
+                    Thank you, <strong id="succ-cust-name">-</strong>! Your order has been received by our store and entered into our Order Management System.
+                </p>
+
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:14px; text-align:left; margin-bottom:18px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:12px; color:#64748b;">Order Number:</span>
+                        <strong style="font-family:var(--font-mono); font-size:14px; color:#2563eb;" id="succ-order-id">SZ-00000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:12px; color:#64748b;">Amount to Collect (COD):</span>
+                        <strong style="font-size:14px; color:#10b981;" id="succ-total">Rs. 0</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:12px; color:#64748b;">Delivery To:</span>
+                        <span style="font-size:12px; font-weight:600;" id="succ-address">-</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:12px; color:#64748b;">SMS Dispatch Status:</span>
+                        <span style="font-size:12px; color:#0284c7; font-weight:700;">📨 Dispatched via SMSLENZ</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="btn-proceed-checkout" style="flex:1; margin-top:0; background:#2563eb;" onclick="trackCreatedOrder()">
+                        🔍 Track Order Live
+                    </button>
+                    <button type="button" class="btn-track-header" style="padding:10px 14px;" onclick="closeSuccessReceiptModal()">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         CUSTOMER TRACKING MODAL
+         ======================================================== -->
+    <div id="store-tracking-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width:540px;">
+            <div class="modal-head">
+                <h3>🔍 Track Your Order Delivery</h3>
+                <button type="button" class="btn-close-cart" onclick="closeStoreTrackingModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+                    Enter your <strong>Order ID</strong> (e.g. SZ-10024) or <strong>Phone Number</strong> or <strong>Waybill Number</strong>:
+                </p>
+
+                <div style="display:flex; gap:8px; margin-bottom:16px;">
+                    <input type="text" id="store-track-input" class="form-input" placeholder="e.g. SZ-10024, BE4542289, or 07XXXXXXXX">
+                    <button type="button" class="btn-buy-now" style="padding:0 18px; font-size:13px;" onclick="executeStoreTrack()">
+                        Track
+                    </button>
+                </div>
+
+                <!-- Tracking Result Container -->
+                <div id="store-track-result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Multi-Tenant URL parameters: ?store=<merchantId>
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeParam = urlParams.get('store') || urlParams.get('merchant') || urlParams.get('id');
+
+        // Lookup store merchant info from UsersStorage
+        function getStoreMerchant() {
+            try {
+                const rawUsers = localStorage.getItem('sz_oms_users');
+                if (rawUsers) {
+                    const users = JSON.parse(rawUsers);
+                    if (storeParam) {
+                        const found = users.find(u => u.id === storeParam || (u.storeName && u.storeName.toLowerCase().replace(/\s+/g, '-') === storeParam.toLowerCase()));
+                        if (found) return found;
+                    }
+                    // If no param, check logged in user, else default to admin (Pamidu)
+                    const curRaw = localStorage.getItem('sz_oms_current_user');
+                    if (curRaw) {
+                        const cur = JSON.parse(curRaw);
+                        const curMatch = users.find(u => u.id === cur.id);
+                        if (curMatch) return curMatch;
+                    }
+                    return users.find(u => u.id === 'usr_admin') || users[0];
+                }
+            } catch(e) {}
+            return {
+                id: 'usr_admin',
+                name: 'Pamidu Mihiranga',
+                storeName: 'SmartZone Official Store',
+                phone: '0786800086'
+            };
+        }
+
+        const activeMerchant = getStoreMerchant();
+        const activeStoreId = activeMerchant ? activeMerchant.id : (storeParam || 'usr_admin');
+
+        // Multi-Tenant LocalStorage data keys (100% Isolated Per Merchant):
+        const PRODUCTS_KEY = `sz_oms_${activeStoreId}_products`;
+        const ORDERS_KEY = `sz_oms_${activeStoreId}_orders`;
+        const SMS_KEY = `sz_oms_${activeStoreId}_sms_settings`;
+
+        let cart = [];
+        let lastCreatedOrderId = '';
+
+        // Default Sample Products for Master Admin Account only
+        const DEFAULT_STORE_PRODUCTS = [
+            {
+                id: 'PRD-101',
+                name: 'Smart Watch Series 9 (Amoled Display)',
+                category: 'Watches',
+                price: 4350,
+                cost: 2900,
+                stock: 25,
+                weight: 0.35,
+                icon: '⌚'
+            },
+            {
+                id: 'PRD-102',
+                name: 'Bluetooth Wireless Earbuds Pro (Active Noise Cancel)',
+                category: 'Audio',
+                price: 2700,
+                cost: 1600,
+                stock: 40,
+                weight: 0.15,
+                icon: '🎧'
+            },
+            {
+                id: 'PRD-103',
+                name: 'Super Fast Dual USB-C Fast Charger 65W GaN',
+                category: 'Electronics',
+                price: 1850,
+                cost: 1100,
+                stock: 18,
+                weight: 0.20,
+                icon: '⚡'
+            },
+            {
+                id: 'PRD-104',
+                name: 'Heavy Bass Portable Waterproof Bluetooth Speaker',
+                category: 'Audio',
+                price: 3600,
+                cost: 2200,
+                stock: 12,
+                weight: 0.65,
+                icon: '🔊'
+            },
+            {
+                id: 'PRD-105',
+                name: 'Braided Fast Charging Cable (Type-C / Lightning)',
+                category: 'Accessories',
+                price: 650,
+                cost: 320,
+                stock: 65,
+                weight: 0.08,
+                icon: '🔌'
+            },
+            {
+                id: 'PRD-106',
+                name: 'Universal Magnetic Car Mount Dashboard Holder',
+                category: 'Accessories',
+                price: 950,
+                cost: 480,
+                stock: 22,
+                weight: 0.12,
+                icon: '🧲'
+            }
+        ];
+
+        function getStoredProducts() {
+            const raw = localStorage.getItem(PRODUCTS_KEY);
+            if (!raw) {
+                if (activeStoreId === 'usr_admin') {
+                    // Check legacy key
+                    const leg = localStorage.getItem('sz_oms_products');
+                    if (leg) {
+                        try {
+                            const parsedLeg = JSON.parse(leg);
+                            if (Array.isArray(parsedLeg) && parsedLeg.length > 0) {
+                                localStorage.setItem(PRODUCTS_KEY, leg);
+                                return parsedLeg;
+                            }
+                        } catch(e) {}
+                    }
+                    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(DEFAULT_STORE_PRODUCTS));
+                    return DEFAULT_STORE_PRODUCTS;
+                }
+                // Newly registered merchants have 0 products!
+                localStorage.setItem(PRODUCTS_KEY, JSON.stringify([]));
+                return [];
+            }
+            try {
+                const list = JSON.parse(raw);
+                return Array.isArray(list) ? list : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function getStoredOrders() {
+            const raw = localStorage.getItem(ORDERS_KEY);
+            if (!raw) {
+                if (activeStoreId === 'usr_admin') {
+                    const leg = localStorage.getItem('sz_oms_orders');
+                    if (leg) {
+                        try {
+                            const parsed = JSON.parse(leg);
+                            if (Array.isArray(parsed)) {
+                                localStorage.setItem(ORDERS_KEY, leg);
+                                return parsed;
+                            }
+                        } catch(e) {}
+                    }
+                }
+                return [];
+            }
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // Initialize Storefront
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update Merchant Branding
+            if (activeMerchant) {
+                const titleEl = document.getElementById('store-title-text');
+                if (titleEl) titleEl.textContent = activeMerchant.storeName || 'Online Store';
+                document.title = `${activeMerchant.storeName || 'Online Store'} | Official Storefront Sri Lanka`;
+
+                const phonePill = document.querySelector('.top-announcement strong');
+                if (phonePill && activeMerchant.phone) {
+                    phonePill.textContent = activeMerchant.phone;
+                }
+
+                // If merchant has customized store link
+                const brandLink = document.querySelector('.store-brand');
+                if (brandLink && activeStoreId !== 'usr_admin') {
+                    brandLink.href = `store.html?store=${encodeURIComponent(activeStoreId)}`;
+                }
+            }
+
+            renderProductsGrid();
+            updateCartHeader();
+
+            // Auto-open live tracking if customer opened SMS tracking link (?track=...)
+            const trackParam = urlParams.get('track');
+            if (trackParam) {
+                openStoreTrackingModal();
+                const trackInput = document.getElementById('store-track-input');
+                if (trackInput) {
+                    trackInput.value = trackParam;
+                    executeStoreTrack();
+                }
+            }
+        });
+
+        let activeCategory = 'All';
+        let searchQuery = '';
+
+        function renderProductsGrid() {
+            const container = document.getElementById('store-products-grid');
+            if (!container) return;
+
+            const products = getStoredProducts();
+
+            // Handle clean empty state for new merchants
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:60px 20px; background:#fff; border-radius:16px; border:1px dashed #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                        <div style="font-size:52px; margin-bottom:12px;">🏪</div>
+                        <h3 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:8px;">No Products Listed Yet</h3>
+                        <p style="font-size:14px; color:#64748b; max-width:480px; margin:0 auto 18px; line-height:1.6;">
+                            Welcome to <strong>${activeMerchant.storeName || 'our online store'}</strong>! The store owner has not listed products in this storefront yet.
+                        </p>
+                        ${activeMerchant.phone ? `
+                            <a href="tel:${activeMerchant.phone}" class="btn-store-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:10px 24px; border-radius:8px; background:#0284c7; color:#fff; font-weight:700; font-size:13.5px;">
+                                📞 Call Store Owner (${activeMerchant.phone})
+                            </a>
+                        ` : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            const filtered = products.filter(p => {
+                const matchCat = (activeCategory === 'All') || (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
+                const matchSearch = !searchQuery || (p.name && p.name.toLowerCase().includes(searchQuery.toLowerCase())) || (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px; background:#fff; border-radius:12px; border:1px solid #cbd5e1;">
+                        <div style="font-size:36px; margin-bottom:8px;">🔍</div>
+                        <h4 style="font-size:16px; font-weight:800;">No matching products</h4>
+                        <p style="font-size:13px; color:#64748b;">Try searching for another keyword or selecting "All" categories.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => {
+                const isOutOfStock = parseInt(p.stock) <= 0;
+                const icon = p.icon || (p.category === 'Audio' ? '🎧' : (p.category === 'Watches' ? '⌚' : '📦'));
+
+                return `
+                    <div class="product-card">
+                        <div class="product-visual-wrap">
+                            <span class="product-placeholder-icon">${icon}</span>
+                            <span class="product-stock-tag ${isOutOfStock ? 'out' : ''}">
+                                ${isOutOfStock ? 'Out of Stock' : (p.stock + ' in Stock')}
+                            </span>
+                        </div>
+                        <div class="product-body">
+                            <div class="product-category-text">${p.category || 'General'}</div>
+                            <h3 class="product-title">${p.name}</h3>
+                            <div class="product-sku-sub">SKU: ${p.id}</div>
+                            <div class="product-price-row">
+                                <span class="product-price-num">Rs. ${parseFloat(p.price).toLocaleString()}</span>
+                                <span class="product-unit-weight">${p.weight || 0.5} kg</span>
+                            </div>
+                            <div class="product-actions-wrap">
+                                <button type="button" class="btn-add-cart" onclick="addToCart('${p.id}')" ${isOutOfStock ? 'disabled' : ''}>
+                                    + Add to Cart
+                                </button>
+                                <button type="button" class="btn-buy-now" onclick="buyNowSingleProduct('${p.id}')" ${isOutOfStock ? 'disabled' : ''}>
+                                    ⚡ Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterCatalog(category, el) {
+            activeCategory = category;
+            document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderProductsGrid();
+        }
+
+        function handleCatalogSearch(val) {
+            searchQuery = val.trim();
+            renderProductsGrid();
+        }
+
+        // Cart Management
+        function addToCart(productId) {
+            const products = getStoredProducts();
+            const p = products.find(item => item.id === productId);
+            if (!p) return;
+
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({
+                    id: p.id,
+                    name: p.name,
+                    price: parseFloat(p.price),
+                    weight: parseFloat(p.weight || 0.5),
+                    qty: 1
+                });
+            }
+
+            updateCartHeader();
+            renderCartDrawer();
+            openCartDrawer();
+        }
+
+        function buyNowSingleProduct(productId) {
+            addToCart(productId);
+            openCheckoutModal();
+        }
+
+        function updateCartQty(productId, delta) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+
+            updateCartHeader();
+            renderCartDrawer();
+        }
+
+        function updateCartHeader() {
+            const totalCount = cart.reduce((acc, it) => acc + it.qty, 0);
+            const countEl = document.getElementById('header-cart-count');
+            const drawerCountEl = document.getElementById('cart-drawer-items-count');
+            if (countEl) countEl.textContent = totalCount;
+            if (drawerCountEl) drawerCountEl.textContent = totalCount;
+        }
+
+        function renderCartDrawer() {
+            const container = document.getElementById('cart-items-container');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:50px 20px; color:#64748b;">
+                        <div style="font-size:42px; margin-bottom:10px;">🛒</div>
+                        <h4 style="font-weight:700; color:#0f172a;">Your cart is empty</h4>
+                        <p style="font-size:12.5px; margin-top:4px;">Browse items above and add them to your cart.</p>
+                    </div>
+                `;
+                document.getElementById('cart-summary-subtotal').textContent = 'Rs. 0';
+                document.getElementById('cart-summary-grand-total').textContent = 'Rs. 0';
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="cart-item-row">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
+                        <div class="cart-qty-ctrl">
+                            <button type="button" class="btn-qty" onclick="updateCartQty('${item.id}', -1)">-</button>
+                            <span style="font-size:13px; font-weight:700; min-width:20px; text-align:center;">${item.qty}</span>
+                            <button type="button" class="btn-qty" onclick="updateCartQty('${item.id}', 1)">+</button>
+                            <span style="font-size:11px; color:#64748b; margin-left:6px;">(Rs. ${item.price.toLocaleString()} ea)</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const subtotal = cart.reduce((acc, it) => acc + (it.price * it.qty), 0);
+            const delivery = 500;
+            const grandTotal = subtotal + delivery;
+
+            document.getElementById('cart-summary-subtotal').textContent = `Rs. ${subtotal.toLocaleString()}`;
+            document.getElementById('cart-summary-delivery').textContent = `Rs. ${delivery.toLocaleString()}`;
+            document.getElementById('cart-summary-grand-total').textContent = `Rs. ${grandTotal.toLocaleString()}`;
+        }
+
+        function openCartDrawer() {
+            renderCartDrawer();
+            document.getElementById('cart-drawer-overlay').classList.add('open');
+        }
+
+        function closeCartDrawer() {
+            document.getElementById('cart-drawer-overlay').classList.remove('open');
+        }
+
+        function handleCartOverlayClick(e) {
+            if (e.target.id === 'cart-drawer-overlay') {
+                closeCartDrawer();
+            }
+        }
+
+        // Checkout Modal
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Please add items before checking out.');
+                return;
+            }
+
+            closeCartDrawer();
+
+            const subtotal = cart.reduce((acc, it) => acc + (it.price * it.qty), 0);
+            const delivery = 500;
+            const total = subtotal + delivery;
+            const count = cart.reduce((acc, it) => acc + it.qty, 0);
+
+            document.getElementById('chk-item-count').textContent = count;
+            document.getElementById('chk-items-total').textContent = `Rs. ${subtotal.toLocaleString()}`;
+            document.getElementById('chk-grand-total').textContent = `Rs. ${total.toLocaleString()}`;
+
+            document.getElementById('checkout-modal-overlay').classList.add('open');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal-overlay').classList.remove('open');
+        }
+
+        // Handle Customer Order Submission
+        function handleCustomerCheckoutSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const phone2 = document.getElementById('cust-phone2').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const city = document.getElementById('cust-city').value.trim();
+            const paymentMethod = document.getElementById('cust-payment-method').value;
+            const notes = document.getElementById('cust-notes').value.trim();
+
+            if (!phone || phone.length !== 10 || !phone.startsWith('0')) {
+                alert('Please enter a valid 10-digit Sri Lankan phone number (e.g. 07XXXXXXXX)');
+                return;
+            }
+
+            const subtotal = cart.reduce((acc, it) => acc + (it.price * it.qty), 0);
+            const deliveryCharge = 500;
+            const grandTotal = subtotal + deliveryCharge;
+            const totalWeight = cart.reduce((acc, it) => acc + (it.weight * it.qty), 0);
+
+            const orderId = 'SZ-' + Math.floor(10000 + Math.random() * 90000);
+            lastCreatedOrderId = orderId;
+
+            const newOrder = {
+                id: orderId,
+                customer: name,
+                phone: phone,
+                phone2: phone2,
+                address: address + (notes ? ` (${notes})` : ''),
+                city: city,
+                email: 'customer@webstore.lk',
+                serviceId: '',               // Pending courier assignment by merchant
+                provider: 'Pending Dispatch', // Merchant selects Trans Express or Fardar in OMS
+                clientId: '',
+                waybill: 'Awaiting Courier Dispatch',
+                weight: totalWeight > 0 ? parseFloat(totalWeight.toFixed(2)) : 0.5,
+                deliveryCharge: deliveryCharge,
+                items: [...cart],
+                total: grandTotal,
+                paid: (paymentMethod.includes('COD') ? 'Unpaid' : 'Paid'),
+                status: 'Pending',           // Web Store incoming order
+                origin: 'Web Storefront',
+                date: new Date().toISOString().slice(0, 16).replace('T', ' ')
+            };
+
+            // Save to OrdersStorage in localStorage
+            const orders = getStoredOrders();
+            orders.unshift(newOrder);
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+            // Deduct stock from ProductsStorage
+            const products = getStoredProducts();
+            cart.forEach(cartItem => {
+                const prod = products.find(p => p.id === cartItem.id);
+                if (prod) {
+                    prod.stock = Math.max(0, (parseInt(prod.stock) || 0) - cartItem.qty);
+                }
+            });
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+
+            // Automated Customer SMS dispatch via SMSLENZ
+            const storeName = document.getElementById('store-title-text').textContent || 'SmartZone LK';
+            console.log(`[Storefront SMSLENZ Automated Dispatch] Sending order confirmation to ${phone}...`);
+
+            // Clear Cart
+            cart = [];
+            updateCartHeader();
+            closeCheckoutModal();
+
+            // Open Order Success Modal
+            document.getElementById('succ-cust-name').textContent = name;
+            document.getElementById('succ-order-id').textContent = orderId;
+            document.getElementById('succ-total').textContent = `Rs. ${grandTotal.toLocaleString()}.00`;
+            document.getElementById('succ-address').textContent = `${address}, ${city}`;
+            document.getElementById('order-success-modal').classList.add('open');
+        }
+
+        function closeSuccessReceiptModal() {
+            document.getElementById('order-success-modal').classList.remove('open');
+            renderProductsGrid();
+        }
+
+        function trackCreatedOrder() {
+            closeSuccessReceiptModal();
+            openStoreTrackingModal();
+            document.getElementById('store-track-input').value = lastCreatedOrderId;
+            executeStoreTrack();
+        }
+
+        // Storefront Order Tracking Modal
+        function openStoreTrackingModal() {
+            document.getElementById('store-tracking-modal').classList.add('open');
+        }
+
+        function closeStoreTrackingModal() {
+            document.getElementById('store-tracking-modal').classList.remove('open');
+        }
+
+        function executeStoreTrack() {
+            const query = (document.getElementById('store-track-input').value || '').trim().toLowerCase();
+            const resultBox = document.getElementById('store-track-result');
+            if (!resultBox) return;
+
+            if (!query) {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `<div style="color:#ef4444; font-size:13px; font-weight:700;">Please enter an Order ID or Phone number or Waybill number.</div>`;
+                return;
+            }
+
+            const orders = getStoredOrders();
+            const found = orders.find(o => 
+                (o.id && o.id.toLowerCase() === query) ||
+                (o.waybill && o.waybill.toLowerCase() === query) ||
+                (o.phone && o.phone.includes(query))
+            );
+
+            resultBox.style.display = 'block';
+
+            if (!found) {
+                resultBox.innerHTML = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:14px; text-align:center;">
+                        <div style="font-size:24px; margin-bottom:4px;">🔍</div>
+                        <h4 style="color:#991b1b; font-size:14.5px; font-weight:800;">Order Not Found</h4>
+                        <p style="font-size:12.5px; color:#64748b; margin-top:2px;">No matching order found for "${query}". Please check your Order ID.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Determine Stepper Stage
+            let step = 1;
+            if (found.status === 'Dispatched') step = 3;
+            else if (found.status === 'Delivered') step = 5;
+            else if (found.status === 'Processing') step = 2;
+
+            const isDispatched = (found.status === 'Dispatched' || found.status === 'Delivered');
+
+            resultBox.innerHTML = `
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:12px;">
+                        <div>
+                            <div style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase;">ORDER DETAILS:</div>
+                            <strong style="font-size:16px; color:#0f172a;">${found.id}</strong>
+                        </div>
+                        <span style="background:${found.status === 'Delivered' ? '#dcfce7' : '#e0f2fe'}; color:${found.status === 'Delivered' ? '#15803d' : '#0369a1'}; font-size:11.5px; font-weight:800; padding:3px 8px; border-radius:6px;">
+                            ${found.status}
+                        </span>
+                    </div>
+
+                    <div style="font-size:12.5px; color:#334155; line-height:1.5; margin-bottom:12px;">
+                        <div>Recipient: <strong>${found.customer}</strong> (📞 ${found.phone})</div>
+                        <div>Delivery Address: <strong>${found.address}, ${found.city}</strong></div>
+                        <div>COD Amount: <strong style="color:#2563eb;">Rs. ${parseFloat(found.total).toLocaleString()}</strong></div>
+                        <div>Courier Service: <strong>${found.provider || 'Pending Courier Selection'}</strong></div>
+                        ${found.waybill && found.waybill !== 'Awaiting Courier Dispatch' ? `
+                            <div style="margin-top:4px;">Waybill Tracking #: <code style="font-size:13px; font-weight:800; color:#0284c7; background:#e0f2fe; padding:2px 6px; border-radius:4px;">${found.waybill}</code></div>
+                        ` : '<div style="color:#b45309; font-size:12px; margin-top:2px;">⏳ Merchant is packing your items for courier pickup.</div>'}
+                    </div>
+
+                    <!-- 5-Step Visual Stepper -->
+                    <div style="display:flex; justify-content:space-between; text-align:center; font-size:11px; font-weight:700; margin-top:14px; position:relative;">
+                        <div style="color:${step >= 1 ? '#10b981' : '#94a3b8'};">
+                            <div style="width:28px; height:28px; border-radius:50%; background:${step >= 1 ? '#10b981' : '#e2e8f0'}; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px;">1</div>
+                            <div>Placed</div>
+                        </div>
+                        <div style="color:${step >= 2 ? '#10b981' : '#94a3b8'};">
+                            <div style="width:28px; height:28px; border-radius:50%; background:${step >= 2 ? '#10b981' : '#e2e8f0'}; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px;">2</div>
+                            <div>Packed</div>
+                        </div>
+                        <div style="color:${step >= 3 ? '#2563eb' : '#94a3b8'};">
+                            <div style="width:28px; height:28px; border-radius:50%; background:${step >= 3 ? '#2563eb' : '#e2e8f0'}; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px;">3</div>
+                            <div>In Transit</div>
+                        </div>
+                        <div style="color:${step >= 4 ? '#2563eb' : '#94a3b8'};">
+                            <div style="width:28px; height:28px; border-radius:50%; background:${step >= 4 ? '#2563eb' : '#e2e8f0'}; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px;">4</div>
+                            <div>Out for Delivery</div>
+                        </div>
+                        <div style="color:${step >= 5 ? '#10b981' : '#94a3b8'};">
+                            <div style="width:28px; height:28px; border-radius:50%; background:${step >= 5 ? '#10b981' : '#e2e8f0'}; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:4px;">5</div>
+                            <div>Delivered</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
